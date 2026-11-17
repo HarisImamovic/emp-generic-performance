@@ -377,9 +377,84 @@ def run_gui(initial_file: str | None = None) -> None:
 
     root = tk.Tk()
     root.title(APP_NAME)
-    root.geometry("1000x560")
-    root.minsize(800, 440)
+    root.geometry("1200x760")
+    root.minsize(900, 600)
 
+    # ---- theme -------------------------------------------------------------
+    BG, CARD, BORDER = "#f3f4f6", "#ffffff", "#e5e7eb"
+    TEXT, MUTED, SUBTLE = "#111827", "#6b7280", "#9ca3af"
+    HEADER_BG, HEADER_SUB = "#111827", "#9ca3af"
+    ACCENT, ACCENT_HOVER, ACCENT_SOFT = "#2563eb", "#1d4ed8", "#dbeafe"
+    STRIPE, HEAD_BG = "#f9fafb", "#f3f4f6"
+    GREEN, RED, AMBER = "#15803d", "#b91c1c", "#b45309"
+    FAMILY = "Segoe UI" if sys.platform == "win32" else "TkDefaultFont"
+    F_BASE, F_BOLD = (FAMILY, 10), (FAMILY, 10, "bold")
+    F_SMALL, F_TITLE, F_CARD = (FAMILY, 9), (FAMILY, 16, "bold"), (FAMILY, 11, "bold")
+
+    scale = root.winfo_fpixels("1i") / 96.0
+    px = lambda n: int(round(n * scale))
+
+    root.configure(bg=BG)
+    style = ttk.Style(root)
+    style.theme_use("clam")
+    style.configure(".", background=BG, foreground=TEXT, font=F_BASE, bordercolor=BORDER,
+                    lightcolor=BORDER, darkcolor=BORDER, troughcolor=BG, focuscolor=ACCENT)
+    style.configure("TFrame", background=BG)
+    style.configure("Card.TFrame", background=CARD)
+    style.configure("Card.TLabel", background=CARD, foreground=TEXT)
+    style.configure("CardTitle.TLabel", background=CARD, foreground=TEXT, font=F_CARD)
+    style.configure("CardMuted.TLabel", background=CARD, foreground=MUTED, font=F_SMALL)
+    style.configure("Status.TLabel", background=BG, foreground=MUTED, font=F_SMALL)
+
+    style.configure("TButton", background=CARD, foreground=TEXT, bordercolor=BORDER,
+                    lightcolor=CARD, darkcolor=CARD, padding=(px(12), px(5)), relief="flat")
+    style.map("TButton", background=[("pressed", "#e5e7eb"), ("active", STRIPE)],
+              bordercolor=[("focus", ACCENT)])
+    style.configure("Accent.TButton", background=ACCENT, foreground="#ffffff", bordercolor=ACCENT,
+                    lightcolor=ACCENT, darkcolor=ACCENT, font=F_BOLD, padding=(px(16), px(7)))
+    style.map("Accent.TButton", background=[("pressed", ACCENT_HOVER), ("active", ACCENT_HOVER)],
+              bordercolor=[("active", ACCENT_HOVER)], lightcolor=[("active", ACCENT_HOVER)],
+              darkcolor=[("active", ACCENT_HOVER)])
+
+    style.configure("TEntry", fieldbackground=CARD, bordercolor=BORDER, lightcolor=CARD,
+                    darkcolor=CARD, padding=(px(8), px(6)))
+    style.map("TEntry", bordercolor=[("focus", ACCENT)], lightcolor=[("focus", ACCENT)])
+    style.configure("TCombobox", fieldbackground=CARD, background=CARD, bordercolor=BORDER,
+                    lightcolor=CARD, darkcolor=CARD, arrowcolor=MUTED, padding=(px(6), px(3)))
+    style.map("TCombobox", fieldbackground=[("readonly", CARD)], selectbackground=[("readonly", CARD)],
+              selectforeground=[("readonly", TEXT)], bordercolor=[("focus", ACCENT)])
+    style.configure("Card.TCheckbutton", background=CARD, foreground=TEXT, indicatorcolor=CARD,
+                    indicatorbackground=CARD)
+    style.map("Card.TCheckbutton", background=[("active", CARD)],
+              indicatorcolor=[("selected", ACCENT), ("pressed", ACCENT_SOFT)])
+
+    style.configure("Vertical.TScrollbar", background=BORDER, troughcolor=CARD, bordercolor=CARD,
+                    lightcolor=BORDER, darkcolor=BORDER, arrowcolor=SUBTLE, gripcount=0)
+    style.map("Vertical.TScrollbar", background=[("active", SUBTLE)])
+
+    style.configure("Link.TButton", background=CARD, foreground=ACCENT, bordercolor=CARD,
+                    lightcolor=CARD, darkcolor=CARD, padding=(px(6), px(1)), font=F_SMALL)
+    style.map("Link.TButton", background=[("active", ACCENT_SOFT)], bordercolor=[("active", ACCENT_SOFT)],
+              lightcolor=[("active", ACCENT_SOFT)], darkcolor=[("active", ACCENT_SOFT)])
+    style.configure("TPanedwindow", background=BG)
+
+    def bordered(parent, **kw):
+        return tk.Frame(parent, bg=CARD, highlightbackground=BORDER, highlightcolor=BORDER,
+                        highlightthickness=1, **kw)
+
+    def card(parent, title: str, subtitle_var=None):
+        outer = bordered(parent)
+        inner = ttk.Frame(outer, style="Card.TFrame", padding=px(14))
+        inner.pack(fill="both", expand=True)
+        head = ttk.Frame(inner, style="Card.TFrame")
+        head.pack(fill="x", pady=(0, px(10)))
+        ttk.Label(head, text=title, style="CardTitle.TLabel").pack(side="left")
+        if subtitle_var is not None:
+            ttk.Label(head, textvariable=subtitle_var, style="CardMuted.TLabel").pack(
+                side="left", padx=(px(10), 0), pady=(px(2), 0))
+        return outer, inner, head
+
+    # ---- state -------------------------------------------------------------
     state: dict = {"report": None, "visible": [], "results": []}
 
     filter_var = tk.StringVar(value=settings.get("filter", ""))
@@ -387,8 +462,8 @@ def run_gui(initial_file: str | None = None) -> None:
     labels_var = tk.BooleanVar(value=settings.get("with_labels", False))
     change_var = tk.BooleanVar(value=settings.get("with_change", False))
     header_var = tk.BooleanVar(value=settings.get("with_header", False))
-    file_var = tk.StringVar(value="No file loaded - click 'Open export...'")
-    status_var = tk.StringVar(value="")
+    file_var = tk.StringVar(value="No file loaded")
+    status_var = tk.StringVar(value="Ready.")
     count_var = tk.StringVar(value="")
 
     def persist():
@@ -398,66 +473,131 @@ def run_gui(initial_file: str | None = None) -> None:
         )
         save_settings(settings)
 
-    top = ttk.Frame(root, padding=(10, 10, 10, 4))
-    top.pack(fill="x")
-    ttk.Button(top, text="Open export...", command=lambda: open_file()).pack(side="left")
-    ttk.Label(top, textvariable=file_var, foreground="#555").pack(side="left", padx=10)
+    # ---- header ------------------------------------------------------------
+    header = tk.Frame(root, bg=HEADER_BG)
+    header.pack(fill="x")
+    hinner = tk.Frame(header, bg=HEADER_BG)
+    hinner.pack(fill="x", padx=px(20), pady=px(14))
+    htext = tk.Frame(hinner, bg=HEADER_BG)
+    htext.pack(side="left")
+    tk.Label(htext, text=APP_NAME, bg=HEADER_BG, fg="#ffffff", font=F_TITLE).pack(anchor="w")
+    tk.Label(htext, textvariable=file_var, bg=HEADER_BG, fg=HEADER_SUB, font=F_SMALL).pack(anchor="w")
+    ttk.Button(hinner, text="Open export…   Ctrl+O", style="Accent.TButton",
+               command=lambda: open_file()).pack(side="right")
 
-    frow = ttk.Frame(root, padding=(10, 4))
-    frow.pack(fill="x")
-    ttk.Label(frow, text="Campaign filter:").pack(side="left")
-    entry = ttk.Entry(frow, textvariable=filter_var, width=50)
-    entry.pack(side="left", padx=6)
-    ttk.Label(frow, text="comma = OR,  -word = exclude", foreground="#777").pack(side="left")
+    # ---- status bar (packed before body so it stays visible) ----------------
+    status_bar = tk.Frame(root, bg=BG)
+    status_bar.pack(side="bottom", fill="x")
+    tk.Frame(status_bar, bg=BORDER, height=1).pack(fill="x")
+    status_dot = tk.Label(status_bar, text="●", bg=BG, fg=SUBTLE, font=F_SMALL)
+    status_dot.pack(side="left", padx=(px(20), px(6)), pady=px(6))
+    status_lbl = ttk.Label(status_bar, textvariable=status_var, style="Status.TLabel")
+    status_lbl.pack(side="left", fill="x", expand=True, pady=px(6))
 
+    def set_status(msg: str, level: str = "info"):
+        color = {"ok": GREEN, "warn": AMBER, "error": RED}.get(level, SUBTLE)
+        status_var.set(msg)
+        status_dot.configure(fg=color)
+        status_lbl.configure(foreground=color if level in ("warn", "error") else MUTED)
+
+    # ---- body --------------------------------------------------------------
     paned = ttk.PanedWindow(root, orient="horizontal")
-    paned.pack(fill="both", expand=True, padx=10, pady=6)
+    paned.pack(fill="both", expand=True, padx=px(16), pady=px(16))
 
-    left = ttk.Frame(paned)
-    paned.add(left, weight=1)
-    lhead = ttk.Frame(left)
-    lhead.pack(fill="x")
-    ttk.Label(lhead, textvariable=count_var).pack(side="left")
-    ttk.Button(lhead, text="None", width=6, command=lambda: select_all(False)).pack(side="right")
-    ttk.Button(lhead, text="All", width=6, command=lambda: select_all(True)).pack(side="right", padx=4)
-    lbox_frame = ttk.Frame(left)
-    lbox_frame.pack(fill="both", expand=True, pady=(4, 0))
-    lbox = tk.Listbox(lbox_frame, selectmode="multiple", exportselection=False, activestyle="none")
+    # Campaigns card
+    left_wrap = ttk.Frame(paned)
+    paned.add(left_wrap, weight=2)
+    lcard, left, _ = card(left_wrap, "Campaigns", count_var)
+    lcard.pack(fill="both", expand=True, padx=(0, px(8)))
+
+    entry = ttk.Entry(left, textvariable=filter_var)
+    entry.pack(fill="x")
+    ttk.Label(left, text="Filter  ·  comma = OR  ·  -word = exclude",
+              style="CardMuted.TLabel").pack(anchor="w", pady=(px(4), px(8)))
+
+    lbar = ttk.Frame(left, style="Card.TFrame")
+    lbar.pack(fill="x", pady=(0, px(4)))
+    ttk.Label(lbar, text="Click to include / exclude",
+              style="CardMuted.TLabel").pack(side="left")
+    ttk.Button(lbar, text="None", style="Link.TButton",
+               command=lambda: select_all(False)).pack(side="right")
+    ttk.Button(lbar, text="All", style="Link.TButton",
+               command=lambda: select_all(True)).pack(side="right")
+
+    lbox_frame = bordered(left)
+    lbox_frame.pack(fill="both", expand=True)
+    lbox = tk.Listbox(lbox_frame, selectmode="multiple", exportselection=False, activestyle="none",
+                      bg=CARD, fg=SUBTLE, selectbackground=ACCENT_SOFT, selectforeground=TEXT,
+                      font=F_BASE, borderwidth=0, highlightthickness=0, relief="flat")
     lsb = ttk.Scrollbar(lbox_frame, orient="vertical", command=lbox.yview)
     lbox.configure(yscrollcommand=lsb.set)
-    lbox.pack(side="left", fill="both", expand=True)
+    lbox.pack(side="left", fill="both", expand=True, padx=(px(4), 0), pady=px(4))
     lsb.pack(side="right", fill="y")
 
-    right = ttk.Frame(paned)
-    paned.add(right, weight=1)
-    tree = ttk.Treeview(right, columns=("metric", "cur", "prev", "chg"), show="headings", height=8)
-    for col, text, width, anchor in (
-        ("metric", "Metric", 200, "w"), ("cur", "Current", 110, "e"),
-        ("prev", "Compared", 110, "e"), ("chg", "Change", 80, "e"),
-    ):
-        tree.heading(col, text=text)
-        tree.column(col, width=width, anchor=anchor)
-    tree.tag_configure("up", foreground="#1a7f37")
-    tree.tag_configure("down", foreground="#c62828")
-    tree.pack(fill="both", expand=True)
+    # Summary card
+    right_wrap = ttk.Frame(paned)
+    paned.add(right_wrap, weight=3)
+    rcard, right, _ = card(right_wrap, "Summary")
+    rcard.pack(fill="both", expand=True, padx=(px(8), 0))
 
-    opts = ttk.Frame(right, padding=(0, 8, 0, 0))
-    opts.pack(fill="x")
-    ttk.Label(opts, text="Decimal separator:").grid(row=0, column=0, sticky="w")
+    # bottom part first so it never gets squeezed out
+    btns = ttk.Frame(right, style="Card.TFrame")
+    btns.pack(side="bottom", fill="x")
+    ttk.Button(btns, text="Copy to clipboard", style="Accent.TButton",
+               command=lambda: copy_clipboard()).pack(side="right")
+    ttk.Button(btns, text="Export to Excel…", command=lambda: export_file()).pack(
+        side="right", padx=px(8))
+    ttk.Label(btns, text="Ctrl+Shift+C to copy", style="CardMuted.TLabel").pack(side="left")
+    tk.Frame(right, bg=BORDER, height=1).pack(side="bottom", fill="x", pady=px(12))
+
+    opts = ttk.Frame(right, style="Card.TFrame")
+    opts.pack(side="bottom", fill="x", pady=(px(12), 0))
+    ttk.Label(opts, text="Copy options", style="CardMuted.TLabel").grid(
+        row=0, column=0, columnspan=6, sticky="w", pady=(0, px(4)))
+    ttk.Label(opts, text="Decimal", style="Card.TLabel").grid(row=1, column=0, sticky="w")
     ttk.Combobox(opts, textvariable=dec_var, values=(".", ","), width=3, state="readonly").grid(
-        row=0, column=1, sticky="w", padx=(4, 16))
-    ttk.Checkbutton(opts, text="Metric names", variable=labels_var).grid(row=0, column=2, sticky="w")
-    ttk.Checkbutton(opts, text="Change % column", variable=change_var).grid(row=0, column=3, sticky="w", padx=8)
-    ttk.Checkbutton(opts, text="Header row", variable=header_var).grid(row=0, column=4, sticky="w")
+        row=1, column=1, sticky="w", padx=(px(6), px(18)))
+    ttk.Checkbutton(opts, text="Metric names", variable=labels_var, style="Card.TCheckbutton").grid(
+        row=1, column=2, sticky="w")
+    ttk.Checkbutton(opts, text="Change %", variable=change_var, style="Card.TCheckbutton").grid(
+        row=1, column=3, sticky="w", padx=px(12))
+    ttk.Checkbutton(opts, text="Header", variable=header_var, style="Card.TCheckbutton").grid(
+        row=1, column=4, sticky="w")
 
-    btns = ttk.Frame(right, padding=(0, 8, 0, 0))
-    btns.pack(fill="x")
-    ttk.Button(btns, text="Copy to clipboard", command=lambda: copy_clipboard()).pack(side="left")
-    ttk.Button(btns, text="Export to Excel...", command=lambda: export_file()).pack(side="left", padx=6)
+    # results table: a plain label grid, so each cell can have its own color
+    table_frame = bordered(right)
+    table_frame.pack(fill="both", expand=True)
+    table = tk.Frame(table_frame, bg=CARD)
+    table.pack(fill="x", anchor="n")
+    from tkinter import font as tkfont
+    longest = max(tkfont.Font(root, font=F_BASE).measure(m.label) for m in METRICS)
+    table.columnconfigure(0, weight=1, minsize=longest + px(24))
+    for c in (1, 2, 3):
+        table.columnconfigure(c, minsize=px(110 if c < 3 else 100))
+    CELL_PAD = dict(padx=px(12), pady=px(5))
+    for c, (text, anchor) in enumerate((("Metric", "w"), ("Current", "e"),
+                                        ("Compared", "e"), ("Change", "e"))):
+        tk.Label(table, text=text, bg=HEAD_BG, fg=MUTED, font=F_BOLD, anchor=anchor,
+                 padx=px(12), pady=px(6)).grid(row=0, column=c, sticky="nsew")
+    table_cells: list[tuple] = []
+    for n, m in enumerate(METRICS, start=1):
+        rbg = STRIPE if n % 2 == 0 else CARD
+        tk.Frame(table, bg=rbg).grid(row=n, column=0, columnspan=4, sticky="nsew")
+        name = tk.Label(table, text=m.label, bg=rbg, fg=TEXT, font=F_BASE, anchor="w", **CELL_PAD)
+        cur = tk.Label(table, bg=rbg, fg=TEXT, font=F_BOLD, anchor="e", **CELL_PAD)
+        prev = tk.Label(table, bg=rbg, fg=MUTED, font=F_BASE, anchor="e", **CELL_PAD)
+        chg = tk.Label(table, bg=rbg, fg=MUTED, font=F_SMALL, padx=px(8), pady=px(2))
+        name.grid(row=n, column=0, sticky="nsew")
+        cur.grid(row=n, column=1, sticky="nsew")
+        prev.grid(row=n, column=2, sticky="nsew")
+        chg.grid(row=n, column=3, sticky="e", padx=(0, px(10)))
+        table_cells.append((cur, prev, chg, rbg))
 
-    ttk.Label(root, textvariable=status_var, padding=(10, 2, 10, 8), foreground="#555",
-              wraplength=960, justify="left").pack(fill="x")
+    empty = tk.Label(table_frame, bg=CARD, fg=MUTED, font=(FAMILY, 11), justify="center",
+                     text="No data yet\n\nOpen an SA360 export (Ctrl+O)\n"
+                          "or drag the file onto Generic-Performance.exe")
 
+    # ---- behaviour ---------------------------------------------------------
     def open_file(path: str | None = None):
         if not path:
             path = filedialog.askopenfilename(
@@ -471,19 +611,23 @@ def run_gui(initial_file: str | None = None) -> None:
             report = load_report(path)
         except Exception as exc:
             messagebox.showerror(APP_NAME, f"Could not read file:\n\n{exc}")
+            set_status("Could not read file.", "error")
             return
         settings["last_dir"] = str(Path(path).parent)
         persist()
         state["report"] = report
-        sheet = f"  [sheet: {report.sheet}]" if report.sheet else ""
-        file_var.set(f"{Path(path).name}{sheet}  -  {len(report.rows)} campaign rows")
+        sheet = f"  ·  sheet {report.sheet}" if report.sheet else ""
+        file_var.set(f"{Path(path).name}{sheet}  ·  {len(report.rows)} campaign rows")
         missing = report.missing_columns()
         msg = []
         if report.campaign_col is None:
             msg.append("No 'Campaign' column found - rows are listed by row number.")
         if missing:
             msg.append("Columns not found: " + ", ".join(missing))
-        status_var.set("  ".join(msg) or "All columns found.")
+        if msg:
+            set_status("  ".join(msg), "warn")
+        else:
+            set_status(f"Loaded {Path(path).name} - all columns found.", "ok")
         refresh_list()
 
     def refresh_list(*_):
@@ -495,7 +639,7 @@ def run_gui(initial_file: str | None = None) -> None:
             for i, r in enumerate(report.rows):
                 if match_filter(r.name, text):
                     state["visible"].append(i)
-                    lbox.insert("end", r.name)
+                    lbox.insert("end", "  " + r.name)
             lbox.select_set(0, "end")
         recompute()
 
@@ -507,26 +651,35 @@ def run_gui(initial_file: str | None = None) -> None:
         return [state["visible"][i] for i in lbox.curselection()]
 
     def recompute(*_):
-        tree.delete(*tree.get_children())
         report = state["report"]
         if not report:
-            count_var.set("Campaigns")
+            count_var.set("")
             state["results"] = []
+            table.pack_forget()
+            empty.place(relx=0.5, rely=0.5, anchor="center")
             return
+        empty.place_forget()
+        table.pack(fill="x", anchor="n")
         sel = selected_rows()
-        count_var.set(f"Campaigns: {len(sel)} selected / {len(state['visible'])} shown / {len(report.rows)} total")
+        shown = len(state["visible"])
+        count_var.set(f"{len(sel)} of {shown} selected" + (
+            f"  ·  {len(report.rows) - shown} filtered out" if shown < len(report.rows) else ""))
         results = aggregate(report, sel)
         state["results"] = results
         dec = dec_var.get()
-        for r in results:
+        for r, (cur, prev, chg_lbl, rbg) in zip(results, table_cells):
+            cur.configure(text=fmt_value(r.cur, r.kind, dec, thousands=True) or "–")
+            prev.configure(text=fmt_value(r.prev, r.kind, dec, thousands=True) or "–")
             chg = r.change
-            tag = () if chg is None or chg == 0 else (("up",) if chg > 0 else ("down",))
-            tree.insert("", "end", values=(
-                r.label,
-                fmt_value(r.cur, r.kind, dec, thousands=True),
-                fmt_value(r.prev, r.kind, dec, thousands=True),
-                "" if chg is None else ("+" if chg > 0 else "") + fmt_value(chg, "pct", dec),
-            ), tags=tag)
+            if chg is None or chg == 0:
+                chg_lbl.configure(text="–" if chg is None else fmt_value(chg, "pct", dec),
+                                  bg=rbg, fg=MUTED, font=F_SMALL)
+            elif chg > 0:
+                chg_lbl.configure(text="▲ +" + fmt_value(chg, "pct", dec),
+                                  bg="#dcfce7", fg=GREEN, font=(FAMILY, 9, "bold"))
+            else:
+                chg_lbl.configure(text="▼ " + fmt_value(chg, "pct", dec),
+                                  bg="#fee2e2", fg=RED, font=(FAMILY, 9, "bold"))
 
     def copy_clipboard():
         if not state["results"] or not selected_rows():
@@ -538,7 +691,7 @@ def run_gui(initial_file: str | None = None) -> None:
         root.clipboard_append(text)
         root.update()
         persist()
-        status_var.set("Copied to clipboard - paste into Excel (Ctrl+V).")
+        set_status("Copied to clipboard - paste into Excel with Ctrl+V.", "ok")
 
     def export_file():
         report = state["report"]
@@ -558,9 +711,10 @@ def run_gui(initial_file: str | None = None) -> None:
                         [report.rows[i].name for i in selected_rows()], filter_var.get())
         except PermissionError:
             messagebox.showerror(APP_NAME, "Could not save - is the file open in Excel?")
+            set_status("Could not save - is the file open in Excel?", "error")
             return
         persist()
-        status_var.set(f"Saved {out}")
+        set_status(f"Saved {out}", "ok")
 
     filter_var.trace_add("write", refresh_list)
     dec_var.trace_add("write", recompute)
@@ -571,6 +725,7 @@ def run_gui(initial_file: str | None = None) -> None:
 
     recompute()
     entry.focus_set()
+    root.after(80, lambda: paned.sashpos(0, int(paned.winfo_width() * 0.37)))
     if initial_file:
         root.after(50, lambda: open_file(initial_file))
     root.mainloop()
