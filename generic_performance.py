@@ -27,8 +27,8 @@ METRICS: tuple[Metric, ...] = (
     Metric("Impr.", ("impr", "impressions"), "int"),
     Metric("Avg. CPC", ("avgcpc", "averagecpc"), "money", ("Cost", "Clicks")),
     Metric("CTR", ("ctr", "clickthroughrate"), "pct", ("Clicks", "Impr.")),
-    Metric("CU App Submits", ("cuappsubmits",), "num"),
-    Metric("CU App Submit Sale Value", ("cuappsubmitsalevalue",), "money"),
+    Metric("CU - Community - App Submit", ("cucommunityappsubmit", "cuappsubmits"), "num"),
+    Metric("CU - Community App Submit Value (Sales)", ("cucommunityappsubmitvaluesales", "cuappsubmitsalevalue"), "money"),
 )
 
 _COMPARE_RE = re.compile(
@@ -106,6 +106,8 @@ def fmt_value(value: float | None, kind: str, dec_sep: str = ".", thousands: boo
         s = f"{value:{t}.2f}"
     if dec_sep != ".":
         s = s.replace(",", "\0").replace(".", dec_sep).replace("\0", "." if thousands else "")
+    if kind == "money":
+        s = "-$" + s[1:] if s.startswith("-") else "$" + s
     return s
 
 
@@ -288,13 +290,15 @@ def build_clipboard_text(results: list[ResultRow], dec_sep: str, with_labels: bo
         lines.append("\t".join(cols))
     for r in results:
         cells = ([r.label] if with_labels else []) + [
-            fmt_value(r.cur, r.kind, dec_sep),
-            fmt_value(r.prev, r.kind, dec_sep),
+            fmt_value(r.cur, r.kind, dec_sep, thousands=r.kind == "money"),
+            fmt_value(r.prev, r.kind, dec_sep, thousands=r.kind == "money"),
         ]
         if with_change:
             cells.append(fmt_value(r.change, "pct", dec_sep))
         lines.append("\t".join(cells))
-    return "\r\n".join(lines)
+    # Plain "\n": Tk on Windows expands each "\n" to "\r\n" itself, so "\r\n" here
+    # would become "\r\r\n" and Excel pastes an empty row after every line.
+    return "\n".join(lines)
 
 
 _XL_FORMATS = {"money": "#,##0.00", "int": "#,##0", "num": "#,##0.##", "pct": "0.00%"}
@@ -317,7 +321,7 @@ def export_xlsx(path: str | Path, results: list[ResultRow], report: Report,
         for col in (2, 3):
             ws.cell(row, col).number_format = _XL_FORMATS[r.kind]
         ws.cell(row, 4).number_format = "0.00%"
-    ws.column_dimensions["A"].width = 28
+    ws.column_dimensions["A"].width = 42
     for col in "BCD":
         ws.column_dimensions[col].width = 16
 

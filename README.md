@@ -2,7 +2,7 @@
 
 Small Windows desktop tool. It turns a Google Search Ads 360 campaign export into a two-column table (current period | compared period) that you can paste into Excel.
 
-Metrics, in this order: **Cost, Clicks, Impr., Avg. CPC, CTR, CU App Submits, CU App Submit Sale Value**.
+Metrics, in this order: **Cost, Clicks, Impr., Avg. CPC, CTR, CU - Community - App Submit, CU - Community App Submit Value (Sales)**.
 
 ## Use
 
