@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-"""
-Generic Performance - turn a Google Search Ads 360 export into a compact
-"current vs. compared period" table, ready to paste into Excel.
-
-Usage:
-    python generic_performance.py                 # opens the window
-    python generic_performance.py report.xlsx     # opens the window with a file loaded
-    (or drag an .xlsx/.csv file onto Generic-Performance.exe)
-"""
 from __future__ import annotations
 
 import csv
@@ -22,17 +12,13 @@ from pathlib import Path
 
 APP_NAME = "Generic Performance"
 
-# --------------------------------------------------------------------------- #
-# Metric definitions
-# --------------------------------------------------------------------------- #
-
 
 @dataclass(frozen=True)
 class Metric:
     label: str
-    aliases: tuple[str, ...]          # normalised header names (see norm())
-    kind: str                         # money | int | num | pct
-    derived: tuple[str, str] | None = None  # (numerator, denominator) labels
+    aliases: tuple[str, ...]
+    kind: str
+    derived: tuple[str, str] | None = None
 
 
 METRICS: tuple[Metric, ...] = (
@@ -45,22 +31,17 @@ METRICS: tuple[Metric, ...] = (
     Metric("CU App Submit Sale Value", ("cuappsubmitsalevalue",), "money"),
 )
 
-# Suffix (after the metric name) that marks the comparison-period column,
-# e.g. "Cost (Compared to)", "Cost (Comparison)", "Cost (previous period)".
 _COMPARE_RE = re.compile(
     r"^(comparedto|compareto|comparison|compared|previousperiod|previous|priorperiod|prior)"
 )
-# ...but not the delta columns, e.g. "Cost (Compared to) (% change)".
 _DELTA_WORDS = ("change", "diff", "pct", "percent", "delta")
 
 
 def norm(value) -> str:
-    """Lower-case and strip everything except letters and digits."""
     return re.sub(r"[^a-z0-9]", "", str(value).lower()) if value is not None else ""
 
 
 def classify_header(header) -> tuple[str, str] | None:
-    """Map a header cell to (metric label, 'cur' | 'prev'), or None."""
     n = norm(header)
     if not n:
         return None
@@ -75,16 +56,11 @@ def classify_header(header) -> tuple[str, str] | None:
     return None
 
 
-# --------------------------------------------------------------------------- #
-# Number parsing / formatting
-# --------------------------------------------------------------------------- #
-
 _NON_NUMERIC = re.compile(r"[^\d,.\-]")
 _EMPTY_TOKENS = {"", "--", "-", "—", "n/a", "na", "none", "null"}
 
 
 def to_number(value) -> float | None:
-    """Parse Excel/CSV cell values like 1234.5, '€1,234.50', '5.23%', '--'."""
     if value is None or isinstance(value, bool):
         return None
     if isinstance(value, (int, float)):
@@ -98,14 +74,12 @@ def to_number(value) -> float | None:
     if not s or s == "-":
         return None
     if "," in s and "." in s:
-        # whichever separator comes last is the decimal separator
         if s.rfind(",") > s.rfind("."):
             s = s.replace(".", "").replace(",", ".")
         else:
             s = s.replace(",", "")
     elif "," in s:
         parts = s.split(",")
-        # "12,5" -> decimal comma; "1,234" / "1,234,567" -> thousands
         s = s.replace(",", ".") if len(parts) == 2 and len(parts[1]) != 3 else s.replace(",", "")
     elif s.count(".") > 1:
         s = s.replace(".", "")
@@ -119,7 +93,6 @@ def to_number(value) -> float | None:
 
 
 def fmt_value(value: float | None, kind: str, dec_sep: str = ".", thousands: bool = False) -> str:
-    """Format a value for clipboard (no thousands separators) or display."""
     if value is None:
         return ""
     t = "," if thousands else ""
@@ -132,7 +105,6 @@ def fmt_value(value: float | None, kind: str, dec_sep: str = ".", thousands: boo
     else:
         s = f"{value:{t}.2f}"
     if dec_sep != ".":
-        # swap separators: 1,234.56 -> 1.234,56
         s = s.replace(",", "\0").replace(".", dec_sep).replace("\0", "." if thousands else "")
     return s
 
@@ -141,11 +113,6 @@ def pct_change(cur: float | None, prev: float | None) -> float | None:
     if cur is None or prev is None or prev == 0:
         return None
     return (cur - prev) / abs(prev)
-
-
-# --------------------------------------------------------------------------- #
-# Reading the export
-# --------------------------------------------------------------------------- #
 
 
 @dataclass
@@ -159,7 +126,7 @@ class Report:
     path: Path
     sheet: str | None
     header: list
-    columns: dict[tuple[str, str], int]   # (metric label, period) -> column index
+    columns: dict[tuple[str, str], int]
     campaign_col: int | None
     rows: list[Row]
 
@@ -168,7 +135,6 @@ class Report:
         for m in METRICS:
             for period, suffix in (("cur", ""), ("prev", " (compared)")):
                 if (m.label, period) not in self.columns:
-                    # derived metrics are fine if their inputs exist
                     if m.derived and all((d, period) in self.columns for d in m.derived):
                         continue
                     out.append(m.label + suffix)
@@ -250,7 +216,6 @@ def load_report(path: str | Path) -> Report:
             first_text = next((str(v).strip() for v in values if v not in (None, "")), "")
             name = _cell(values, campaign_col)
             name = str(name).strip() if name not in (None, "") else ""
-            # skip SA360 summary rows ("Total: ...", "Totals", ...)
             if norm(first_text).startswith("total") or norm(name).startswith("total"):
                 continue
             if all(to_number(_cell(values, c)) is None for c in metric_cols):
@@ -262,11 +227,6 @@ def load_report(path: str | Path) -> Report:
         "Could not find a header row with Cost and Clicks/Impr. columns.\n"
         "Make sure the export contains those columns."
     )
-
-
-# --------------------------------------------------------------------------- #
-# Aggregation
-# --------------------------------------------------------------------------- #
 
 
 @dataclass
@@ -296,7 +256,6 @@ def aggregate(report: Report, row_indices: list[int]) -> list[ResultRow]:
             nums = [to_number(_cell(r.values, col)) for r in rows]
             vals[m.label] = sum(x for x in nums if x is not None)
 
-        # ratios are recomputed from the summed totals (never summed/averaged)
         for m in METRICS:
             if not m.derived:
                 continue
@@ -312,7 +271,6 @@ def aggregate(report: Report, row_indices: list[int]) -> list[ResultRow]:
 
 
 def match_filter(name: str, text: str) -> bool:
-    """Comma-separated terms: any plain term must match (OR); '-term' excludes."""
     terms = [t.strip().lower() for t in text.split(",") if t.strip()]
     include = [t for t in terms if not t.startswith("-")]
     exclude = [t[1:].strip() for t in terms if t.startswith("-") and t[1:].strip()]
@@ -374,11 +332,6 @@ def export_xlsx(path: str | Path, results: list[ResultRow], report: Report,
     wb.save(path)
 
 
-# --------------------------------------------------------------------------- #
-# Settings
-# --------------------------------------------------------------------------- #
-
-
 def _settings_path() -> Path:
     base = os.environ.get("APPDATA") or str(Path.home())
     return Path(base) / "Generic-Performance" / "settings.json"
@@ -409,11 +362,6 @@ def system_decimal_separator() -> str:
         return "."
 
 
-# --------------------------------------------------------------------------- #
-# GUI
-# --------------------------------------------------------------------------- #
-
-
 def run_gui(initial_file: str | None = None) -> None:
     import tkinter as tk
     from tkinter import filedialog, messagebox, ttk
@@ -434,7 +382,6 @@ def run_gui(initial_file: str | None = None) -> None:
 
     state: dict = {"report": None, "visible": [], "results": []}
 
-    # ---- variables
     filter_var = tk.StringVar(value=settings.get("filter", ""))
     dec_var = tk.StringVar(value=settings.get("dec_sep", system_decimal_separator()))
     labels_var = tk.BooleanVar(value=settings.get("with_labels", False))
@@ -451,7 +398,6 @@ def run_gui(initial_file: str | None = None) -> None:
         )
         save_settings(settings)
 
-    # ---- layout
     top = ttk.Frame(root, padding=(10, 10, 10, 4))
     top.pack(fill="x")
     ttk.Button(top, text="Open export...", command=lambda: open_file()).pack(side="left")
@@ -512,7 +458,6 @@ def run_gui(initial_file: str | None = None) -> None:
     ttk.Label(root, textvariable=status_var, padding=(10, 2, 10, 8), foreground="#555",
               wraplength=960, justify="left").pack(fill="x")
 
-    # ---- behaviour
     def open_file(path: str | None = None):
         if not path:
             path = filedialog.askopenfilename(
@@ -524,7 +469,7 @@ def run_gui(initial_file: str | None = None) -> None:
                 return
         try:
             report = load_report(path)
-        except Exception as exc:  # noqa: BLE001 - show anything to the user
+        except Exception as exc:
             messagebox.showerror(APP_NAME, f"Could not read file:\n\n{exc}")
             return
         settings["last_dir"] = str(Path(path).parent)
