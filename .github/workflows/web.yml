@@ -1,7 +1,7 @@
-name: Website
+name: Website tests
 
-# Tests the website against the desktop app's calculations, then publishes it to
-# GitHub Pages when main changes. Pull requests only run the tests.
+# Checks the website against the desktop app's calculations and that it builds.
+# Publishing is done by Cloudflare Pages, which builds web/ on every push to main.
 
 on:
   push:
@@ -62,22 +62,3 @@ jobs:
       - name: Build
         working-directory: web
         run: npm run build
-
-      - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        with:
-          path: web/dist
-
-  deploy:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: test
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4

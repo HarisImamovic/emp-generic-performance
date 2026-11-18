@@ -60,6 +60,9 @@ function saveSettings(s: Settings) {
 type Level = "info" | "ok" | "warn" | "error";
 const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 const MOD = IS_MAC ? "⌘" : "Ctrl+";
+// Cloudflare Access handles sign-in in front of the site; this ends that session.
+// Hidden on the local dev server, where there is no sign-in.
+const LOGOUT_URL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) ? null : "/cdn-cgi/access/logout";
 
 function downloadBytes(bytes: ArrayBuffer, fileName: string) {
   const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -280,6 +283,11 @@ export default function App() {
           {busy ? "Reading…" : "Open export…"}
           <kbd>{MOD}O</kbd>
         </button>
+        {LOGOUT_URL && (
+          <a className="btn ghost" href={LOGOUT_URL}>
+            Sign out
+          </a>
+        )}
         <input
           ref={fileInput}
           type="file"

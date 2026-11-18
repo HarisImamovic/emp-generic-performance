@@ -124,6 +124,15 @@ input {
 .btn.accent:hover:not(:disabled) {
   background: var(--accent-hover);
 }
+.btn.ghost {
+  background: transparent;
+  border-color: #374151;
+  color: #e5e7eb;
+  text-decoration: none;
+}
+.btn.ghost:hover {
+  background: #1f2937;
+}
 .btn:disabled {
   opacity: 0.5;
   cursor: default;

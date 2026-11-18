@@ -4,7 +4,7 @@ Turns a Google Search Ads 360 campaign export into current-period vs. compared-p
 
 It comes in two forms that work the same way:
 
-- **Website** (`web/`, React + TypeScript): runs in any browser, including on phones. Files are read on the user's device and never uploaded.
+- **Website** (`web/`, React + TypeScript): runs in any browser, including on phones. Only signed-in team members can open it. Files are read on the user's device and never uploaded.
 - **Desktop app** (`desktop/`, Python): Windows `.exe` and Mac app.
 
 ```
@@ -14,7 +14,7 @@ tests/fixtures/           made-up SA360 exports used by the tests
 tests/expected/           what the desktop app calculates for them
 .github/workflows/
   build-desktop.yml       builds the exe and Mac app for releases
-  web.yml                 tests the website and publishes it to GitHub Pages
+  web.yml                 checks the website matches the desktop app (Cloudflare publishes it)
 ```
 
 ## Metrics
@@ -49,9 +49,10 @@ Shortcuts:
 
 ## Website
 
-### Privacy
+### Privacy and sign-in
 
-The website has no server side. GitHub Pages only serves the page's own files. The page reads an export in the browser's memory and never sends it anywhere. Its Content-Security-Policy blocks all network requests from the page (`connect-src 'none'`) and it loads nothing from other sites. To check this yourself, open the browser's developer tools, go to the **Network** tab and open a file: no requests appear. Closing the tab clears the data. The only thing stored is the copy settings, in that browser's local storage.
+- **Sign-in:** the site is hosted on Cloudflare Pages behind **Cloudflare Access**. Only email addresses on the allow-list can open it. People enter their email and get a one-time code, so there are no passwords. Cloudflare checks this before sending any of the site's files. **Sign out** in the header ends the session.
+- **Client data:** the site has no server side. A file is read in the browser's memory and never sent anywhere. Closing the tab clears the data. The Content-Security-Policy (`web/public/_headers`) blocks all network requests from the page (`connect-src 'none'`) and loads nothing from other sites. To check it yourself, open the browser's developer tools, go to the **Network** tab and open a file: no requests appear. The only thing stored is the copy settings, in that browser's local storage.
 
 ### Develop
 
@@ -65,9 +66,33 @@ npm test         # compares results with the desktop app
 npm run build    # production build in web/dist
 ```
 
-### Deploy
+### Deploy (Cloudflare Pages + Access)
 
-Every push to `main` that changes `web/`, `tests/` or the desktop calculations runs `.github/workflows/web.yml`. The workflow tests the site and publishes it to GitHub Pages. Pull requests only run the tests. One-time setup: repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+Cloudflare builds and publishes `web/` on every push to `main`. GitHub only runs the tests (`.github/workflows/web.yml`).
+
+**Hosting (one time).** Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**. Pick this repo and set:
+
+| Setting | Value |
+|---|---|
+| Production branch | `main` |
+| Framework preset | None |
+| Build command | `npm ci && npm run build` |
+| Build output directory | `dist` |
+| Root directory | `web` |
+
+The site's address is `https://<project-name>.pages.dev`.
+
+**Sign-in (one time).** Cloudflare dashboard → **Zero Trust** → **Access** → **Applications** → **Add an application** → **Self-hosted**:
+
+- **Application domains:** add two:
+  - `<project-name>.pages.dev` (the live site)
+  - `*.<project-name>.pages.dev` (preview builds of other branches)
+- **Policy:** action **Allow**, include **Emails**, then list each team member's address.
+- **Login method:** **One-time PIN**.
+
+**Add or remove someone:** Zero Trust → Access → Applications → this app → Policies → edit the email list. Up to 50 users is free.
+
+**Check it:** open the site in a private window. You should get Cloudflare's sign-in page, not the app.
 
 ## Desktop app
 
