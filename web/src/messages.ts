@@ -83,6 +83,12 @@ export function exportedMessage(fileName: string): ToastMessage {
   return { tone: "success", title: "Excel file downloaded", detail: fileName };
 }
 
+export const NO_METRICS_SHOWN: ToastMessage = {
+  tone: "warning",
+  title: "No metrics selected",
+  detail: "Choose at least one metric under Metrics to copy or export.",
+};
+
 export const FIRST_FILE_ONLY: ToastMessage = {
   tone: "info",
   title: "Opened the first file only",

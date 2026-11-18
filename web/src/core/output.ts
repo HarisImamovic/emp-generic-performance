@@ -109,12 +109,11 @@ export async function exportXlsx(
     });
   });
 
-  report.metrics.forEach((metric, index) => {
-    summary.getCell(3 + index, 1).value = metric.label;
+  const labels = (blocks[0]?.[1] ?? []).map((row) => row.label);
+  labels.forEach((label, index) => {
+    summary.getCell(3 + index, 1).value = label;
   });
-  const longestLabel = report.metrics.length
-    ? Math.max(...report.metrics.map((m) => m.label.length))
-    : LABEL_COLUMN_MIN_WIDTH;
+  const longestLabel = labels.length ? Math.max(...labels.map((label) => label.length)) : LABEL_COLUMN_MIN_WIDTH;
   summary.getColumn(1).width = Math.max(LABEL_COLUMN_MIN_WIDTH, Math.min(LABEL_COLUMN_MAX_WIDTH, longestLabel + 2));
 
   const campaigns = workbook.addWorksheet("Campaigns");
