@@ -1,6 +1,6 @@
-name: Build exe
+name: Build desktop app
 
-# Builds the Windows exe and the macOS app on GitHub-hosted machines.
+# Builds the Windows exe and the macOS app (desktop/) on GitHub-hosted machines.
 # - Pushing a tag like v1.0.0 (or publishing a release with a new tag)
 #   attaches both files to that release on the Releases page.
 # - "Run workflow" on the Actions tab builds them without making a release
@@ -17,12 +17,17 @@ permissions:
 jobs:
   windows:
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: desktop/requirements.txt
 
       - name: Install dependencies
         run: python -m pip install -r requirements.txt pyinstaller
@@ -33,17 +38,22 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Generic-Performance-Windows
-          path: dist/Generic-Performance.exe
+          path: desktop/dist/Generic-Performance.exe
 
   macos:
     # Apple Silicon (M1 and newer) Macs.
     runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: desktop
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: desktop/requirements.txt
 
       - name: Install dependencies
         run: python -m pip install -r requirements.txt pyinstaller
@@ -61,7 +71,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Generic-Performance-mac
-          path: Generic-Performance-mac.zip
+          path: desktop/Generic-Performance-mac.zip
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
