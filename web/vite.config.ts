@@ -2,9 +2,7 @@
 import { type Plugin, defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// The built page may only load its own files and may not send data anywhere.
-// (Added at build time only: the dev server needs inline scripts.)
-const CSP = [
+const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
@@ -22,13 +20,11 @@ const contentSecurityPolicy = (): Plugin => ({
   transformIndexHtml: (html) =>
     html.replace(
       '<meta charset="UTF-8" />',
-      `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`,
+      `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${CONTENT_SECURITY_POLICY}" />`,
     ),
 });
 
 export default defineConfig({
-  // Relative asset paths, so the build works under any URL path
-  // (e.g. https://<user>.github.io/<repo>/).
   base: "./",
   plugins: [react(), contentSecurityPolicy()],
   build: {

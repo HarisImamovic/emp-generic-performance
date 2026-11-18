@@ -9,23 +9,16 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 APP_NAME = "Generic Performance"
+Kind = Literal["money", "int", "num", "pct"]
 
-# Keyboard shortcuts use Command on macOS and Control elsewhere.
 MAC = sys.platform == "darwin"
 MOD = "Command" if MAC else "Control"
 KEY = "⌘" if MAC else "Ctrl+"
 SHIFT = "⇧" if MAC else "Shift+"
 
-
-# ---- segments ----------------------------------------------------------------
-# Mirrors the SA360 CASE rules:
-#   searchnb + post                         -> BAU | Post-L | Generic Search
-#   searchnb + dma, no post                 -> BAU | Pre-L | Generic Search | Campus
-#   searchnb, no dma, no post               -> BAU | Pre-L | Generic Search | Vertical
-# and every rule excludes aurora / ssm / cindma / slcdma / nsh.
-# "Generic overall" is the union of the three.
 
 @dataclass(frozen=True)
 class Segment:
@@ -44,7 +37,6 @@ GENERIC_EXCLUDE = ("aurora", "ssm", "cindma", "slcdma", "nsh")
 
 
 def segment_of(name: str) -> Segment | None:
-    """The single base segment a campaign belongs to (never GENERIC), or None."""
     n = name.lower()
     if "searchnb" not in n or any(x in n for x in GENERIC_EXCLUDE):
         return None
@@ -54,8 +46,6 @@ def segment_of(name: str) -> Segment | None:
         return PRE_CAMPUS
     return PRE_VERTICAL
 
-
-# ---- parsing helpers -----------------------------------------------------------
 
 def norm(value) -> str:
     return re.sub(r"[^a-z0-9]", "", str(value).lower()) if value is not None else ""
@@ -101,7 +91,7 @@ def to_number(value) -> float | None:
     return x / 100 if is_pct else x
 
 
-def fmt_value(value: float | None, kind: str, dec_sep: str = ".", thousands: bool = False) -> str:
+def fmt_value(value: float | None, kind: Kind, dec_sep: str = ".", thousands: bool = False) -> str:
     if value is None:
         return ""
     t = "," if thousands else ""
@@ -126,24 +116,19 @@ def pct_change(cur: float | None, prev: float | None) -> float | None:
     return (cur - prev) / abs(prev)
 
 
-# ---- metric columns -------------------------------------------------------------
-
 @dataclass
 class MetricCol:
     label: str
-    kind: str                 # money | int | num | pct
-    cur: int | None           # column index of the current period
-    prev: int | None          # column index of the compared period
-    derived: tuple[int, int, float] | None = None   # (numerator idx, denominator idx, factor) into metrics
+    kind: Kind
+    cur: int | None
+    prev: int | None
+    derived: tuple[int, int, float] | None = None
 
 
-# After a metric's own name, these mark its compared-period column / its delta column.
 _COMPARE_RE = re.compile(r"^(comparedto|compareto|comparison|compared|previousperiod|previous|priorperiod|prior)")
 _DELTA_RE = re.compile(r"(change|diff|delta|pct|percent)")
 _ORPHAN_COMPARE_RE = re.compile(r"(comparedto|compareto|comparison|previousperiod|priorperiod)")
 
-# Ratios that must be recomputed from sums, never summed or averaged:
-# (header norms, numerator norms, denominator norms, factor, kind)
 _DERIVED_RULES = (
     (("avgcpc", "averagecpc", "cpc"), ("cost",), ("clicks",), 1.0, "money"),
     (("ctr", "clickthroughrate"), ("clicks",), ("impr", "impressions"), 1.0, "pct"),
@@ -180,12 +165,6 @@ def _base_kind(n: str, raw: list) -> str:
 
 def parse_columns(header: list, rows: list[tuple], campaign_col: int | None
                   ) -> tuple[list[MetricCol], list[str]]:
-    """Every numeric column in the export becomes a metric (file order).
-
-    Returns (metrics, skipped) where skipped lists columns that are rates/averages
-    which cannot be summed and whose formula is unknown, or that have no compared
-    column in a comparison export (settings such as Budget).
-    """
     labels = ["" if h is None else str(h).strip() for h in header]
     norms = [norm(h) for h in labels]
     first: dict[str, int] = {}
@@ -193,7 +172,6 @@ def parse_columns(header: list, rows: list[tuple], campaign_col: int | None
         if n and n not in first:
             first[n] = j
 
-    # pair "<metric> (Compared to)" with "<metric>"; drop "<metric> (% change)"
     prev_of: dict[str, int] = {}
     secondary: set[int] = set()
     for j, n in enumerate(norms):
@@ -215,7 +193,6 @@ def parse_columns(header: list, rows: list[tuple], campaign_col: int | None
     def col_values(j):
         return [r[j] if j < len(r) else None for r in rows]
 
-    # numeric base columns, file order
     bases: list[int] = []
     for n, j in first.items():
         if j in secondary or j == campaign_col or _ID_RE.search(labels[j]) or _ORPHAN_COMPARE_RE.search(n):
@@ -226,7 +203,7 @@ def parse_columns(header: list, rows: list[tuple], campaign_col: int | None
 
     metrics: list[MetricCol] = []
     skipped: list[str] = []
-    pending: list[tuple[int, int, tuple, tuple, float, str]] = []   # (metric idx, col, num, den, factor, kind)
+    pending: list[tuple[int, int, tuple, tuple, float, str]] = []
 
     def additive_by_norm(cands) -> int | None:
         for c in cands:
@@ -250,7 +227,6 @@ def parse_columns(header: list, rows: list[tuple], campaign_col: int | None
             metrics.append(MetricCol(labels[j], "pct", j, prev_of.get(n)))
             pending.append((len(metrics) - 1, j, (), (), 1.0, "pct"))
         elif prev_of and n not in prev_of:
-            # comparison export, but this column has none: a setting (Budget, target CPA), not performance
             skipped.append(f"{labels[j]} (no compared column)")
         else:
             metrics.append(MetricCol(labels[j], _base_kind(n, raw), j, prev_of.get(n)))
@@ -262,13 +238,12 @@ def parse_columns(header: list, rows: list[tuple], campaign_col: int | None
             drop.add(k)
             skipped.append(f"{labels[j]} (not summable)")
             continue
-        if not kind:   # generic "A / B" column
+        if not kind:
             ka, kb = metrics[a].kind, metrics[b].kind
             kind = "money" if ka == "money" and kb != "money" else "num"
         metrics[k].kind = kind
         metrics[k].derived = (a, b, factor)
 
-    # drop non-aggregatable columns and re-point derived indices
     remap, kept = {}, []
     for k, m in enumerate(metrics):
         if k not in drop:
@@ -280,8 +255,6 @@ def parse_columns(header: list, rows: list[tuple], campaign_col: int | None
             m.derived = (remap[a], remap[b], f)
     return kept, skipped
 
-
-# ---- report loading -------------------------------------------------------------
 
 @dataclass
 class Row:
@@ -331,7 +304,6 @@ def _read_csv_rows(path: Path) -> list[list]:
         delimiter = csv.Sniffer().sniff(sample, delimiters=",;\t").delimiter
     except csv.Error:
         delimiter = max(("\t", ";", ","), key=sample.count)
-    # SA360 location/targeting cells can exceed csv's default 128 KB field limit.
     csv.field_size_limit(2**31 - 1)
     return list(csv.reader(io.StringIO(text), delimiter=delimiter))
 
@@ -405,12 +377,10 @@ def load_report(path: str | Path) -> Report:
     )
 
 
-# ---- aggregation ----------------------------------------------------------------
-
 @dataclass
 class ResultRow:
     label: str
-    kind: str
+    kind: Kind
     cur: float | None
     prev: float | None
 
@@ -443,8 +413,6 @@ def aggregate(report: Report, row_indices: list[int]) -> list[ResultRow]:
             for k, m in enumerate(report.metrics)]
 
 
-# ---- output ---------------------------------------------------------------------
-
 def _value_cells(r: ResultRow, dec_sep: str, with_change: bool) -> list[str]:
     cells = [fmt_value(r.cur, r.kind, dec_sep, thousands=r.kind == "money"),
              fmt_value(r.prev, r.kind, dec_sep, thousands=r.kind == "money")]
@@ -461,8 +429,6 @@ def build_clipboard_text(results: list[ResultRow], dec_sep: str, with_labels: bo
         lines.append("\t".join(cols))
     for r in results:
         lines.append("\t".join(([r.label] if with_labels else []) + _value_cells(r, dec_sep, with_change)))
-    # Plain "\n": Tk on Windows expands each "\n" to "\r\n" itself, so "\r\n" here
-    # would become "\r\r\n" and Excel pastes an empty row after every line.
     return "\n".join(lines)
 
 
@@ -540,8 +506,6 @@ def export_xlsx(path: str | Path, report: Report, blocks: list[tuple[Segment, li
     wb.save(path)
 
 
-# ---- settings -------------------------------------------------------------------
-
 def _settings_path() -> Path:
     base = os.environ.get("APPDATA") or str(Path.home())
     return Path(base) / "Generic-Performance" / "settings.json"
@@ -572,8 +536,6 @@ def system_decimal_separator() -> str:
         return "."
 
 
-# ---- GUI ------------------------------------------------------------------------
-
 LAYOUTS = {"Side by side": "side", "Stacked": "stacked"}
 
 
@@ -596,7 +558,6 @@ def run_gui(initial_file: str | None = None) -> None:
     root.geometry("1280x800")
     root.minsize(960, 620)
 
-    # ---- theme -------------------------------------------------------------
     BG, CARD, BORDER = "#f3f4f6", "#ffffff", "#e5e7eb"
     TEXT, MUTED, SUBTLE = "#111827", "#6b7280", "#9ca3af"
     HEADER_BG, HEADER_SUB = "#111827", "#9ca3af"
@@ -668,7 +629,6 @@ def run_gui(initial_file: str | None = None) -> None:
                 side="left", padx=(px(10), 0), pady=(px(2), 0))
         return outer, inner, head
 
-    # ---- state -------------------------------------------------------------
     seg_by_key = {s.key: s for s in SEGMENTS}
     state: dict = {"report": None, "seg": seg_by_key.get(settings.get("segment"), POST_L),
                    "excluded": set(), "visible": [], "results": []}
@@ -692,7 +652,6 @@ def run_gui(initial_file: str | None = None) -> None:
         settings.pop("filter", None)
         save_settings(settings)
 
-    # ---- header ------------------------------------------------------------
     header = tk.Frame(root, bg=HEADER_BG)
     header.pack(fill="x")
     hinner = tk.Frame(header, bg=HEADER_BG)
@@ -704,7 +663,6 @@ def run_gui(initial_file: str | None = None) -> None:
     ttk.Button(hinner, text=f"Open export…   {KEY}O", style="Accent.TButton",
                command=lambda: open_file()).pack(side="right")
 
-    # ---- status bar (packed before body so it stays visible) ----------------
     status_bar = tk.Frame(root, bg=BG)
     status_bar.pack(side="bottom", fill="x")
     tk.Frame(status_bar, bg=BORDER, height=1).pack(fill="x")
@@ -719,7 +677,6 @@ def run_gui(initial_file: str | None = None) -> None:
         status_dot.configure(fg=color)
         status_lbl.configure(foreground=color if level in ("warn", "error") else MUTED)
 
-    # ---- segment tabs ------------------------------------------------------
     tabs_bar = tk.Frame(root, bg=BG)
     tabs_bar.pack(fill="x", padx=px(16), pady=(px(14), 0))
     tabs: dict[str, tk.Label] = {}
@@ -744,11 +701,9 @@ def run_gui(initial_file: str | None = None) -> None:
                 text=text, bg=ACCENT if active else CARD, fg="#ffffff" if active else TEXT,
                 highlightbackground=ACCENT if active else BORDER)
 
-    # ---- body --------------------------------------------------------------
     paned = ttk.PanedWindow(root, orient="horizontal")
     paned.pack(fill="both", expand=True, padx=px(16), pady=px(12))
 
-    # Campaigns card
     left_wrap = ttk.Frame(paned)
     paned.add(left_wrap, weight=2)
     lcard, left, _ = card(left_wrap, "Campaigns", count_var)
@@ -774,13 +729,11 @@ def run_gui(initial_file: str | None = None) -> None:
     ttk.Label(left, text="Excluding a campaign here also removes it from Generic overall.",
               style="CardMuted.TLabel").pack(anchor="w", pady=(px(6), 0))
 
-    # Summary card
     right_wrap = ttk.Frame(paned)
     paned.add(right_wrap, weight=3)
     rcard, right, _ = card(right_wrap, summary_title)
     rcard.pack(fill="both", expand=True, padx=(px(8), 0))
 
-    # bottom part first so it never gets squeezed out
     btns = ttk.Frame(right, style="Card.TFrame")
     btns.pack(side="bottom", fill="x")
     ttk.Button(btns, text="Copy segment", style="Accent.TButton",
@@ -809,7 +762,6 @@ def run_gui(initial_file: str | None = None) -> None:
     ttk.Combobox(opts, textvariable=layout_var, values=tuple(LAYOUTS), width=12, state="readonly").grid(
         row=1, column=6, sticky="w", padx=(px(6), 0))
 
-    # results table: a label grid inside a scrollable canvas (metric count depends on the file)
     table_frame = bordered(right)
     table_frame.pack(fill="both", expand=True)
     canvas = tk.Canvas(table_frame, bg=CARD, highlightthickness=0, borderwidth=0)
@@ -865,7 +817,6 @@ def run_gui(initial_file: str | None = None) -> None:
                      text=f"No data yet\n\nOpen an SA360 export ({KEY}O)"
                           + ("" if MAC else "\nor drag the file onto Generic-Performance.exe"))
 
-    # ---- behaviour ---------------------------------------------------------
     def open_file(path: str | None = None):
         if not path:
             path = filedialog.askopenfilename(

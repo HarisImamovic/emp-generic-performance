@@ -1,6 +1,3 @@
-# Cloudflare Pages response headers for every page and file.
-# The page reads exports on the device only; this policy also stops it from
-# sending data anywhere (connect-src 'none') or being embedded in other sites.
 /*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff

@@ -1,11 +1,5 @@
 name: Build desktop app
 
-# Builds the Windows exe and the macOS app (desktop/) on GitHub-hosted machines.
-# - Pushing a tag like v1.0.0 (or publishing a release with a new tag)
-#   attaches both files to that release on the Releases page.
-# - "Run workflow" on the Actions tab builds them without making a release
-#   (download them from the run's Artifacts section).
-
 on:
   push:
     tags: ["v*"]
@@ -41,7 +35,6 @@ jobs:
           path: desktop/dist/Generic-Performance.exe
 
   macos:
-    # Apple Silicon (M1 and newer) Macs.
     runs-on: macos-latest
     defaults:
       run:
@@ -64,7 +57,6 @@ jobs:
       - name: Build app
         run: pyinstaller --noconfirm --onedir --windowed --name Generic-Performance --osx-bundle-identifier com.generic-performance.app generic_performance.py
 
-      # ditto keeps the .app bundle's symlinks and permissions intact.
       - name: Zip app
         run: ditto -c -k --keepParent dist/Generic-Performance.app Generic-Performance-mac.zip
 

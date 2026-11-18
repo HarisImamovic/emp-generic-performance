@@ -1,7 +1,3 @@
-"""Writes the made-up SA360-style exports in tests/fixtures/ (no real client data).
-
-Run once after changing it: python tests/make_fixtures.py
-"""
 from __future__ import annotations
 
 import csv
@@ -27,7 +23,6 @@ HEADER = [
     "Leads / Clicks", "Leads / Clicks (Compared to)",
 ]
 
-# name, budget, cost, cost_prev, clicks, clicks_prev, impr, impr_prev, conv, conv_prev, value, value_prev, leads, leads_prev, is
 CAMPAIGNS = [
     ("US_SearchNB_Post_Brand-Terms", 500, 1234.567, 1100.125, 812, 790, 15230, 14980, 41.5, 38, 9100.25, 8700, 12, 9, 0.62),
     ("US_SearchNB_PostL_Generic", 250, 0.125, 0.375, 1, 3, 40, 52, 0, 0, 0, 0, 0, 1, 0.1),

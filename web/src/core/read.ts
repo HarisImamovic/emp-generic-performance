@@ -1,249 +1,237 @@
-// Reading SA360 exports (.csv / .tsv / .txt / .xlsx / .xlsm) in the browser.
-// Port of _read_csv_rows / _read_xlsx_sheets / load_report in desktop/generic_performance.py.
-// Files are read in memory only; nothing is uploaded or stored.
+import { ReportError } from "./errors";
 import type { Cell } from "./numbers";
-import { type Report, buildReport } from "./report";
+import { type Report, type Sheet, buildReport } from "./report";
 
-// ---- text decoding --------------------------------------------------------------
+const CSV_EXTENSIONS = [".csv", ".tsv", ".txt"];
+const EXCEL_EXTENSIONS = [".xlsx", ".xlsm"];
+const SNIFF_SAMPLE_LENGTH = 50000;
+const SNIFF_CHUNK_LINES = 10;
+const SNIFF_MIN_CONSISTENCY = 0.9;
+const CANDIDATE_DELIMITERS = [",", ";", "\t"];
+const PREFERRED_DELIMITERS = [",", "\t", ";", " ", ":"];
+const FALLBACK_DELIMITER_ORDER = ["\t", ";", ","];
+const BYTES_UNDEFINED_IN_CP1252 = new Set([0x81, 0x8d, 0x8f, 0x90, 0x9d]);
+const LATIN1_DECODE_CHUNK = 8192;
 
-const CP1252_UNDEFINED = new Set([0x81, 0x8d, 0x8f, 0x90, 0x9d]);
+function decodeLatin1(bytes: Uint8Array): string {
+  let text = "";
+  for (let i = 0; i < bytes.length; i += LATIN1_DECODE_CHUNK) {
+    text += String.fromCharCode(...bytes.subarray(i, i + LATIN1_DECODE_CHUNK));
+  }
+  return text;
+}
 
 export function decodeText(bytes: Uint8Array): string {
   if (bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder("utf-16le").decode(bytes);
   if (bytes[0] === 0xfe && bytes[1] === 0xff) return new TextDecoder("utf-16be").decode(bytes);
   try {
-    return new TextDecoder("utf-8", { fatal: true }).decode(bytes); // strips a UTF-8 BOM
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } catch {
-    // Python tries cp1252, then latin-1 when cp1252 hits an undefined byte.
-    if (bytes.some((b) => CP1252_UNDEFINED.has(b))) {
-      let s = "";
-      for (let i = 0; i < bytes.length; i += 8192) {
-        s += String.fromCharCode(...bytes.subarray(i, i + 8192));
-      }
-      return s;
-    }
-    return new TextDecoder("windows-1252").decode(bytes);
+    const isLatin1 = bytes.some((b) => BYTES_UNDEFINED_IN_CP1252.has(b));
+    return isLatin1 ? decodeLatin1(bytes) : new TextDecoder("windows-1252").decode(bytes);
   }
 }
 
-// ---- delimiter detection (Python csv.Sniffer with delimiters=",;\t") ----------------
-
-const DELIMS = [",", ";", "\t"];
-const PREFERRED = [",", "\t", ";", " ", ":"];
-
-function countOf(s: string, ch: string): number {
-  let n = 0;
-  for (let i = s.indexOf(ch); i !== -1; i = s.indexOf(ch, i + 1)) n++;
-  return n;
+function countOccurrences(text: string, character: string): number {
+  return text.split(character).length - 1;
 }
 
-function firstMax<K>(m: Map<K, number>): K {
+function mostFrequentKey<K>(counts: Map<K, number>): K | undefined {
   let best: K | undefined;
-  let bestV = -Infinity;
-  for (const [k, v] of m) if (v > bestV) [best, bestV] = [k, v];
-  return best as K;
-}
-
-function guessQuoteAndDelimiter(data: string): string {
-  const W = String.raw`[^\p{L}\p{N}_\n"']`;
-  const patterns = [
-    String.raw`(?<delim>${W})(?<space> ?)(?<quote>["']).*?\k<quote>\k<delim>`,
-    String.raw`(?:^|\n)(?<quote>["']).*?\k<quote>(?<delim>${W})(?<space> ?)`,
-    String.raw`(?<delim>${W})(?<space> ?)(?<quote>["']).*?\k<quote>(?:$|\n)`,
-    String.raw`(?:^|\n)(?<quote>["']).*?\k<quote>(?:$|\n)`,
-  ];
-  for (const p of patterns) {
-    const matches = [...data.matchAll(new RegExp(p, "gsmu"))];
-    if (!matches.length) continue;
-    const delims = new Map<string, number>();
-    for (const m of matches) {
-      const d = m.groups?.delim;
-      if (d && DELIMS.includes(d)) delims.set(d, (delims.get(d) ?? 0) + 1);
-    }
-    return delims.size ? firstMax(delims) : "";
+  let bestCount = -Infinity;
+  for (const [key, count] of counts) {
+    if (count > bestCount) [best, bestCount] = [key, count];
   }
-  return "";
-}
-
-function guessDelimiter(sample: string): string {
-  const data = sample.split("\n").filter((l) => l);
-  const chunkLength = Math.min(10, data.length);
-  const charFrequency = new Map<string, Map<number, number>>();
-  const delims = new Map<string, [number, number]>();
-  let iteration = 0;
-  let start = 0;
-  let end = chunkLength;
-  while (start < data.length) {
-    iteration++;
-    for (const line of data.slice(start, end)) {
-      for (const ch of DELIMS) {
-        const meta = charFrequency.get(ch) ?? new Map<number, number>();
-        const freq = countOf(line, ch);
-        meta.set(freq, (meta.get(freq) ?? 0) + 1);
-        charFrequency.set(ch, meta);
-      }
-    }
-    const modes = new Map<string, [number, number]>();
-    for (const [ch, meta] of charFrequency) {
-      const items = [...meta.entries()];
-      if (items.length === 1 && items[0][0] === 0) continue;
-      if (items.length > 1) {
-        let mode = items[0];
-        for (const it of items) if (it[1] > mode[1]) mode = it;
-        const rest = items.filter((it) => it !== mode).reduce((s, it) => s + it[1], 0);
-        modes.set(ch, [mode[0], mode[1] - rest]);
-      } else {
-        modes.set(ch, items[0]);
-      }
-    }
-    const total = Math.min(chunkLength * iteration, data.length);
-    let consistency = 1.0;
-    while (delims.size === 0 && consistency >= 0.9) {
-      for (const [k, v] of modes) {
-        if (v[0] > 0 && v[1] > 0 && v[1] / total >= consistency) delims.set(k, v);
-      }
-      consistency -= 0.01;
-    }
-    if (delims.size === 1) return [...delims.keys()][0];
-    start = end;
-    end += chunkLength;
-  }
-  if (!delims.size) return "";
-  for (const d of PREFERRED) if (delims.has(d)) return d;
-  return "";
-}
-
-export function sniffDelimiter(sample: string): string {
-  const d = guessQuoteAndDelimiter(sample) || guessDelimiter(sample);
-  if (d) return d;
-  // csv.Error fallback in the desktop app: most frequent of tab, semicolon, comma
-  let best = "\t";
-  for (const c of ["\t", ";", ","]) if (countOf(sample, c) > countOf(sample, best)) best = c;
   return best;
 }
 
-// ---- CSV parsing (Python csv.reader, default dialect) ----------------------------------
+function delimiterNextToQuotes(sample: string): string | null {
+  const delimiter = String.raw`[^\p{L}\p{N}_\n"']`;
+  const patterns = [
+    String.raw`(?<delim>${delimiter})(?<space> ?)(?<quote>["']).*?\k<quote>\k<delim>`,
+    String.raw`(?:^|\n)(?<quote>["']).*?\k<quote>(?<delim>${delimiter})(?<space> ?)`,
+    String.raw`(?<delim>${delimiter})(?<space> ?)(?<quote>["']).*?\k<quote>(?:$|\n)`,
+    String.raw`(?:^|\n)(?<quote>["']).*?\k<quote>(?:$|\n)`,
+  ];
+  for (const pattern of patterns) {
+    const matches = [...sample.matchAll(new RegExp(pattern, "gsmu"))];
+    if (!matches.length) continue;
+    const counts = new Map<string, number>();
+    for (const match of matches) {
+      const found = match.groups?.delim;
+      if (found && CANDIDATE_DELIMITERS.includes(found)) counts.set(found, (counts.get(found) ?? 0) + 1);
+    }
+    return mostFrequentKey(counts) ?? null;
+  }
+  return null;
+}
+
+function modeWithMargin(frequencies: Map<number, number>): [count: number, margin: number] {
+  const entries = [...frequencies];
+  const mode = entries.reduce((best, entry) => (entry[1] > best[1] ? entry : best));
+  const others = entries.filter((entry) => entry !== mode).reduce((sum, [, lines]) => sum + lines, 0);
+  return [mode[0], mode[1] - others];
+}
+
+function delimiterByConsistency(sample: string): string | null {
+  const lines = sample.split("\n").filter(Boolean);
+  const chunkSize = Math.min(SNIFF_CHUNK_LINES, lines.length);
+  const frequencies = new Map(CANDIDATE_DELIMITERS.map((d) => [d, new Map<number, number>()]));
+  const consistent = new Map<string, [number, number]>();
+
+  for (let chunk = 1, start = 0; start < lines.length; chunk++, start += chunkSize) {
+    for (const line of lines.slice(start, start + chunkSize)) {
+      for (const [delimiter, perCount] of frequencies) {
+        const count = countOccurrences(line, delimiter);
+        perCount.set(count, (perCount.get(count) ?? 0) + 1);
+      }
+    }
+
+    const modes = new Map<string, [number, number]>();
+    for (const [delimiter, perCount] of frequencies) {
+      const neverPresent = perCount.size === 1 && perCount.has(0);
+      if (!neverPresent) modes.set(delimiter, modeWithMargin(perCount));
+    }
+
+    const linesSeen = Math.min(chunkSize * chunk, lines.length);
+    for (let threshold = 1; consistent.size === 0 && threshold >= SNIFF_MIN_CONSISTENCY; threshold -= 0.01) {
+      for (const [delimiter, [count, margin]] of modes) {
+        if (count > 0 && margin > 0 && margin / linesSeen >= threshold) consistent.set(delimiter, [count, margin]);
+      }
+    }
+    if (consistent.size === 1) return [...consistent.keys()][0];
+  }
+
+  return PREFERRED_DELIMITERS.find((d) => consistent.has(d)) ?? null;
+}
+
+function mostCommonDelimiter(sample: string): string {
+  return FALLBACK_DELIMITER_ORDER.reduce((best, d) =>
+    countOccurrences(sample, d) > countOccurrences(sample, best) ? d : best,
+  );
+}
+
+export function sniffDelimiter(sample: string): string {
+  return delimiterNextToQuotes(sample) ?? delimiterByConsistency(sample) ?? mostCommonDelimiter(sample);
+}
 
 export function parseCsv(text: string, delimiter: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [];
   let field = "";
   let inQuotes = false;
-  let afterQuote = false; // a quoted field just closed; later quotes are literal
-  let started = false; // current record has content
-  const endField = () => {
+  let quotedFieldClosed = false;
+  let recordStarted = false;
+
+  const finishField = () => {
     row.push(field);
     field = "";
-    afterQuote = false;
+    quotedFieldClosed = false;
   };
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (inQuotes) {
-      if (c === '"') {
-        if (text[i + 1] === '"') {
-          field += '"';
-          i++;
-        } else {
-          inQuotes = false;
-          afterQuote = true;
-        }
-      } else {
-        field += c;
-      }
-    } else if (c === delimiter) {
-      endField();
-      started = true;
-    } else if (c === "\r" || c === "\n") {
-      if (c === "\r" && text[i + 1] === "\n") i++;
-      if (started || field) {
-        endField();
-        rows.push(row);
-      } else {
-        rows.push([]);
-      }
-      row = [];
-      field = "";
-      afterQuote = false;
-      started = false;
-    } else if (c === '"' && field === "" && !afterQuote) {
-      inQuotes = true;
-      started = true;
+  const finishRecord = () => {
+    if (recordStarted || field) {
+      finishField();
+      rows.push(row);
     } else {
-      field += c;
-      started = true;
+      rows.push([]);
+    }
+    row = [];
+    field = "";
+    quotedFieldClosed = false;
+    recordStarted = false;
+  };
+
+  for (let i = 0; i < text.length; i++) {
+    const character = text[i];
+    if (inQuotes) {
+      if (character !== '"') {
+        field += character;
+      } else if (text[i + 1] === '"') {
+        field += '"';
+        i++;
+      } else {
+        inQuotes = false;
+        quotedFieldClosed = true;
+      }
+    } else if (character === delimiter) {
+      finishField();
+      recordStarted = true;
+    } else if (character === "\r" || character === "\n") {
+      if (character === "\r" && text[i + 1] === "\n") i++;
+      finishRecord();
+    } else if (character === '"' && field === "" && !quotedFieldClosed) {
+      inQuotes = true;
+      recordStarted = true;
+    } else {
+      field += character;
+      recordStarted = true;
     }
   }
-  if (started || field) {
-    endField();
-    rows.push(row);
-  }
+  if (recordStarted || field) finishRecord();
   return rows;
 }
 
 export function readCsvRows(bytes: Uint8Array): string[][] {
   const text = decodeText(bytes);
-  return parseCsv(text, sniffDelimiter(text.slice(0, 50000)));
+  return parseCsv(text, sniffDelimiter(text.slice(0, SNIFF_SAMPLE_LENGTH)));
 }
 
-// ---- Excel ----------------------------------------------------------------------
+const twoDigits = (n: number) => String(n).padStart(2, "0");
 
-const pad = (n: number) => String(n).padStart(2, "0");
-
-/** Python's str(datetime) for a date cell, so text checks behave the same. */
-function pyDate(d: Date): string {
-  return (
-    `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ` +
-    `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`
-  );
+function pythonDateTime(date: Date): string {
+  const day = `${date.getUTCFullYear()}-${twoDigits(date.getUTCMonth() + 1)}-${twoDigits(date.getUTCDate())}`;
+  const time = `${twoDigits(date.getUTCHours())}:${twoDigits(date.getUTCMinutes())}:${twoDigits(date.getUTCSeconds())}`;
+  return `${day} ${time}`;
 }
 
-/** ExcelJS cell value -> the cached value openpyxl returns with data_only=True. */
-function toCell(v: unknown): Cell {
-  if (v === null || v === undefined) return null;
-  if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") return v;
-  if (v instanceof Date) return pyDate(v);
-  if (typeof v === "object") {
-    const o = v as Record<string, unknown>;
-    if ("formula" in o || "sharedFormula" in o) return toCell(o.result);
-    if ("richText" in o && Array.isArray(o.richText)) {
-      return (o.richText as { text: string }[]).map((t) => t.text).join("");
-    }
-    if ("hyperlink" in o) return toCell(o.text);
-    if ("error" in o) return String(o.error);
-    if ("text" in o) return toCell(o.text);
+function cachedCellValue(value: unknown): Cell {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return value;
+  if (value instanceof Date) return pythonDateTime(value);
+  if (typeof value !== "object") return String(value);
+
+  const cell = value as Record<string, unknown>;
+  if ("formula" in cell || "sharedFormula" in cell) return cachedCellValue(cell.result);
+  if (Array.isArray(cell.richText)) return (cell.richText as { text: string }[]).map((part) => part.text).join("");
+  if ("hyperlink" in cell) return cachedCellValue(cell.text);
+  if ("error" in cell) return String(cell.error);
+  if ("text" in cell) return cachedCellValue(cell.text);
+  return String(value);
+}
+
+export async function readXlsxSheets(data: ArrayBuffer): Promise<Sheet[]> {
+  const { default: ExcelJS } = await import("exceljs");
+  const workbook = new ExcelJS.Workbook();
+  try {
+    await workbook.xlsx.load(data);
+  } catch (cause) {
+    throw new ReportError("unreadable-file", `Could not open the Excel file: ${String(cause)}`);
   }
-  return String(v);
-}
-
-export async function readXlsxSheets(data: ArrayBuffer): Promise<[string, Cell[][]][]> {
-  const ExcelJS = (await import("exceljs")).default;
-  const wb = new ExcelJS.Workbook();
-  await wb.xlsx.load(data);
-  return wb.worksheets.map((ws) => {
+  return workbook.worksheets.map((worksheet): Sheet => {
     const rows: Cell[][] = [];
-    for (let r = 1; r <= ws.rowCount; r++) {
-      const values = ws.getRow(r).values as unknown[]; // 1-based, sparse
-      const out: Cell[] = [];
-      for (let c = 1; c < values.length; c++) out.push(toCell(values[c]));
-      rows.push(out);
+    for (let r = 1; r <= worksheet.rowCount; r++) {
+      const values = worksheet.getRow(r).values as unknown[];
+      rows.push(Array.from(values.slice(1), (value) => cachedCellValue(value)));
     }
-    return [ws.name, rows] as [string, Cell[][]];
+    return [worksheet.name, rows];
   });
 }
 
-// ---- entry point ------------------------------------------------------------------
+function extensionOf(fileName: string): string {
+  const dot = fileName.lastIndexOf(".");
+  return dot === -1 ? "" : fileName.slice(dot).toLowerCase();
+}
 
 export async function loadReport(fileName: string, data: ArrayBuffer): Promise<Report> {
-  const ext = fileName.includes(".") ? fileName.slice(fileName.lastIndexOf(".")).toLowerCase() : "";
-  let sheets: [string | null, Cell[][]][];
-  if ([".csv", ".tsv", ".txt"].includes(ext)) {
-    sheets = [[null, readCsvRows(new Uint8Array(data))]];
-  } else if ([".xlsx", ".xlsm"].includes(ext)) {
-    sheets = await readXlsxSheets(data);
-  } else if (ext === ".xls") {
-    throw new Error("Old .xls format is not supported. Export from SA360 as .xlsx or .csv.");
-  } else {
-    throw new Error(`Unsupported file type: ${ext || "(none)"}`);
+  const extension = extensionOf(fileName);
+  if (CSV_EXTENSIONS.includes(extension)) {
+    return buildReport(fileName, [[null, readCsvRows(new Uint8Array(data))]]);
   }
-  return buildReport(fileName, sheets);
+  if (EXCEL_EXTENSIONS.includes(extension)) {
+    return buildReport(fileName, await readXlsxSheets(data));
+  }
+  if (extension === ".xls") {
+    throw new ReportError("legacy-xls", "Old .xls format is not supported.");
+  }
+  throw new ReportError("unsupported-file", `Unsupported file type: ${extension || "(none)"}`);
 }
