@@ -1,6 +1,21 @@
 # Generic Performance
 
-Small desktop tool for Windows and Mac. It turns a Google Search Ads 360 campaign export into current-period vs. compared-period tables for the Generic Search segments, ready to paste into Excel.
+Turns a Google Search Ads 360 campaign export into current-period vs. compared-period tables for the Generic Search segments, ready to paste into Excel.
+
+It comes in two forms that work the same way:
+
+- **Website** (`web/`, React + TypeScript): runs in any browser, including on phones. Files are read on the user's device and never uploaded.
+- **Desktop app** (`desktop/`, Python): Windows `.exe` and Mac app.
+
+```
+desktop/                  Python desktop app (Windows exe, Mac app)
+web/                      React + TypeScript website
+tests/fixtures/           made-up SA360 exports used by the tests
+tests/expected/           what the desktop app calculates for them
+.github/workflows/
+  build-desktop.yml       builds the exe and Mac app for releases
+  web.yml                 tests the website and publishes it to GitHub Pages
+```
 
 ## Metrics
 
@@ -14,33 +29,77 @@ Every numeric column in the export becomes a metric, in file order. Each one is 
 
 ## Use
 
-1. Run `dist\Generic-Performance.exe`, or drag the export file onto the exe.
-2. **Open export...** and pick the `.xlsx` or `.csv` downloaded from SA360. The comparison must be turned on so the `(Compared to)` columns are in the file.
-3. Switch segments with the tabs at the top (Ctrl+1 ... Ctrl+4). Click campaigns in the list to leave them out or add them back. A campaign you leave out of its segment is also left out of Generic overall.
+1. Open the website, or run the desktop app.
+2. **Open export...** and pick the `.xlsx` or `.csv` downloaded from SA360. You can also drop the file on the website, or onto the Windows exe. The comparison must be turned on so the `(Compared to)` columns are in the file.
+3. Switch segments with the tabs at the top. Untick campaigns to leave them out. A campaign you leave out of its segment is also left out of Generic overall.
 4. Copy to Excel:
-   - **Copy segment** (Ctrl+Shift+C): the segment you're viewing.
-   - **Copy all segments** (Ctrl+Shift+A): all four, either **side by side** (Current / Compared columns per segment) or **stacked** (one block per segment, with a blank row between blocks).
-   - **Export to Excel...**: a Summary sheet with all segments, plus a Campaigns sheet showing each campaign's segment and whether it was included.
+   - **Copy segment**: the segment you're viewing.
+   - **Copy all segments**: all four, either **side by side** (Current / Compared columns per segment) or **stacked** (one block per segment, with a blank row between blocks).
+   - **Export to Excel**: a Summary sheet with all segments, plus a Campaigns sheet showing each campaign's segment and whether it was included.
 
-Copy options: decimal separator (`,` for most European Excel setups; the default comes from Windows' regional settings), metric names, a change % column, and a header row. Settings are remembered.
+Copy options: decimal separator (`,` for most European Excel setups; the default comes from the computer's regional settings), metric names, a change % column, and a header row. Settings are remembered on that device.
 
-## Run from source / rebuild the exe
+Shortcuts:
+
+| | Website | Desktop (Windows) | Desktop (Mac) |
+|---|---|---|---|
+| Open export | Ctrl+O / ⌘O | Ctrl+O | ⌘O |
+| Switch segment | 1 … 4 | Ctrl+1 … 4 | ⌘1 … 4 |
+| Copy segment / all | buttons | Ctrl+Shift+C / A | ⌘⇧C / A |
+
+## Website
+
+### Privacy
+
+The website has no server side. GitHub Pages only serves the page's own files. The page reads an export in the browser's memory and never sends it anywhere. Its Content-Security-Policy blocks all network requests from the page (`connect-src 'none'`) and it loads nothing from other sites. To check this yourself, open the browser's developer tools, go to the **Network** tab and open a file: no requests appear. Closing the tab clears the data. The only thing stored is the copy settings, in that browser's local storage.
+
+### Develop
+
+Requires Node.js 20 or newer.
 
 ```
-pip install -r requirements.txt
-python generic_performance.py
+cd web
+npm install
+npm run dev      # local server with live reload
+npm test         # compares results with the desktop app
+npm run build    # production build in web/dist
 ```
 
-To build `dist\Generic-Performance.exe`, double-click `build_exe.bat`. It creates a local `.venv` and runs PyInstaller.
+### Deploy
 
-## Download (no Python needed)
+Every push to `main` that changes `web/`, `tests/` or the desktop calculations runs `.github/workflows/web.yml`. The workflow tests the site and publishes it to GitHub Pages. Pull requests only run the tests. One-time setup: repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+## Desktop app
+
+### Download (no Python needed)
 
 Both downloads bundle Python and every dependency. Get them from the repo's **Releases** page: https://github.com/HarisImamovic/emp-generic-performance/releases/latest
 
 - **Windows:** `Generic-Performance.exe`. It is unsigned, so on first run Windows may show "Windows protected your PC": click **More info → Run anyway**.
-- **Mac (Apple Silicon, M1 or newer):** `Generic-Performance-mac.zip`. Unzip it and move `Generic-Performance.app` to Applications. It is unsigned, so the first time right-click the app → **Open** → **Open** (or System Settings → Privacy & Security → **Open Anyway**). Shortcuts use ⌘ instead of Ctrl.
+- **Mac (Apple Silicon, M1 or newer):** `Generic-Performance-mac.zip`. Unzip it and move `Generic-Performance.app` to Applications. It is unsigned, so the first time right-click the app → **Open** → **Open** (or System Settings → Privacy & Security → **Open Anyway**).
 
-GitHub builds both automatically (`.github/workflows/build-exe.yml`):
+GitHub builds both automatically (`.github/workflows/build-desktop.yml`):
 
-- **New release:** on the Releases page, **Draft a new release**, create a new tag such as `v1.1.0` and publish. Both files are attached to that release about a minute later.
-- **Test build without a release:** Actions tab → **Build exe** → **Run workflow**. The files appear under the run's **Artifacts** (sign-in required).
+- **New release:** on the Releases page, **Draft a new release**, create a new tag such as `v1.2.0` and publish. Both files are attached to that release about a minute later.
+- **Test build without a release:** Actions tab → **Build desktop app** → **Run workflow**. The files appear under the run's **Artifacts** (sign-in required).
+
+### Run from source / build the exe yourself
+
+```
+cd desktop
+pip install -r requirements.txt
+python generic_performance.py
+```
+
+To build `desktop\dist\Generic-Performance.exe` on Windows, double-click `desktop\build_exe.bat`. It creates a local `.venv` and runs PyInstaller.
+
+## Keeping the two apps in sync
+
+The calculations exist twice: in `desktop/generic_performance.py` and in `web/src/core/`. When you change a rule (segments, metrics, formatting), change it in both places, then:
+
+```
+python tests/dump_python.py   # record the desktop app's results
+cd web && npm test            # check the website gives the same results
+```
+
+Commit the updated `tests/expected/` files. CI fails if they're out of date, or if the website's results differ from the desktop app's. To add a test case, edit `tests/make_fixtures.py` and run it. Use made-up data only, never real client exports.

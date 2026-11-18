@@ -1,0 +1,837 @@
+{
+ "file": "sa360.xlsx",
+ "sheet": "Report",
+ "campaignCol": 0,
+ "metrics": [
+  {
+   "label": "Cost",
+   "kind": "money",
+   "cur": 3,
+   "prev": 4,
+   "derived": null
+  },
+  {
+   "label": "Clicks",
+   "kind": "int",
+   "cur": 6,
+   "prev": 7,
+   "derived": null
+  },
+  {
+   "label": "Impr.",
+   "kind": "int",
+   "cur": 8,
+   "prev": 9,
+   "derived": null
+  },
+  {
+   "label": "CTR",
+   "kind": "pct",
+   "cur": 10,
+   "prev": 11,
+   "derived": [
+    1,
+    2,
+    1.0
+   ]
+  },
+  {
+   "label": "Avg. CPC",
+   "kind": "money",
+   "cur": 12,
+   "prev": 13,
+   "derived": [
+    0,
+    1,
+    1.0
+   ]
+  },
+  {
+   "label": "Conversions",
+   "kind": "num",
+   "cur": 14,
+   "prev": 15,
+   "derived": null
+  },
+  {
+   "label": "Conv. value",
+   "kind": "money",
+   "cur": 16,
+   "prev": 17,
+   "derived": null
+  },
+  {
+   "label": "Cost / conv.",
+   "kind": "money",
+   "cur": 18,
+   "prev": 19,
+   "derived": [
+    0,
+    5,
+    1.0
+   ]
+  },
+  {
+   "label": "Conv. value / cost",
+   "kind": "num",
+   "cur": 20,
+   "prev": 21,
+   "derived": [
+    6,
+    0,
+    1.0
+   ]
+  },
+  {
+   "label": "Leads",
+   "kind": "num",
+   "cur": 24,
+   "prev": 25,
+   "derived": null
+  },
+  {
+   "label": "Leads / Clicks",
+   "kind": "num",
+   "cur": 26,
+   "prev": 27,
+   "derived": [
+    9,
+    1,
+    1.0
+   ]
+  }
+ ],
+ "skipped": [
+  "Budget (no compared column)",
+  "Search impr. share (not summable)"
+ ],
+ "missingCompared": [],
+ "rows": [
+  {
+   "name": "US_SearchNB_Post_Brand-Terms",
+   "segment": "post"
+  },
+  {
+   "name": "US_SearchNB_PostL_Generic",
+   "segment": "post"
+  },
+  {
+   "name": "US_SearchNB_Vertical_Nursing",
+   "segment": "vertical"
+  },
+  {
+   "name": "US_SearchNB_Vertical_Business",
+   "segment": "vertical"
+  },
+  {
+   "name": "US_SearchNB_DMA_Chicago",
+   "segment": "campus"
+  },
+  {
+   "name": "US_SearchNB_DMA_Houston",
+   "segment": "campus"
+  },
+  {
+   "name": "US_SearchNB_Aurora_Test",
+   "segment": null
+  },
+  {
+   "name": "US_SearchNB_CinDMA_Local",
+   "segment": null
+  },
+  {
+   "name": "US_Brand_Exact",
+   "segment": null
+  },
+  {
+   "name": "US_PMax_Generic",
+   "segment": null
+  }
+ ],
+ "segments": {
+  "post": {
+   "rows": [
+    0,
+    1
+   ],
+   "all": [
+    {
+     "label": "Cost",
+     "kind": "money",
+     "cur": 1234.692,
+     "prev": 1100.5,
+     "change": 0.12193730122671513
+    },
+    {
+     "label": "Clicks",
+     "kind": "int",
+     "cur": 813.0,
+     "prev": 793.0,
+     "change": 0.025220680958385876
+    },
+    {
+     "label": "Impr.",
+     "kind": "int",
+     "cur": 15270.0,
+     "prev": 15032.0,
+     "change": 0.015832889835018626
+    },
+    {
+     "label": "CTR",
+     "kind": "pct",
+     "cur": 0.053241650294695485,
+     "prev": 0.05275412453432677,
+     "change": 0.00924147191659839
+    },
+    {
+     "label": "Avg. CPC",
+     "kind": "money",
+     "cur": 1.5186863468634686,
+     "prev": 1.3877679697351828,
+     "change": 0.09433736761720186
+    },
+    {
+     "label": "Conversions",
+     "kind": "num",
+     "cur": 41.5,
+     "prev": 38.0,
+     "change": 0.09210526315789473
+    },
+    {
+     "label": "Conv. value",
+     "kind": "money",
+     "cur": 9100.25,
+     "prev": 8700.0,
+     "change": 0.046005747126436784
+    },
+    {
+     "label": "Cost / conv.",
+     "kind": "money",
+     "cur": 29.751614457831327,
+     "prev": 28.960526315789473,
+     "change": 0.027316083050968155
+    },
+    {
+     "label": "Conv. value / cost",
+     "kind": "num",
+     "cur": 7.370461621197837,
+     "prev": 7.905497501135847,
+     "change": -0.06767896389330808
+    },
+    {
+     "label": "Leads",
+     "kind": "num",
+     "cur": 12.0,
+     "prev": 10.0,
+     "change": 0.2
+    },
+    {
+     "label": "Leads / Clicks",
+     "kind": "num",
+     "cur": 0.014760147601476014,
+     "prev": 0.012610340479192938,
+     "change": 0.17047970479704794
+    }
+   ],
+   "some": [
+    {
+     "label": "Cost",
+     "kind": "money",
+     "cur": 1234.567,
+     "prev": 1100.125,
+     "change": 0.12220611294171117
+    },
+    {
+     "label": "Clicks",
+     "kind": "int",
+     "cur": 812.0,
+     "prev": 790.0,
+     "change": 0.027848101265822784
+    },
+    {
+     "label": "Impr.",
+     "kind": "int",
+     "cur": 15230.0,
+     "prev": 14980.0,
+     "change": 0.016688918558077435
+    },
+    {
+     "label": "CTR",
+     "kind": "pct",
+     "cur": 0.053315824031516745,
+     "prev": 0.0527369826435247,
+     "change": 0.010976005053317507
+    },
+    {
+     "label": "Avg. CPC",
+     "kind": "money",
+     "cur": 1.520402709359606,
+     "prev": 1.3925632911392405,
+     "change": 0.09180151382260082
+    },
+    {
+     "label": "Conversions",
+     "kind": "num",
+     "cur": 41.5,
+     "prev": 38.0,
+     "change": 0.09210526315789473
+    },
+    {
+     "label": "Conv. value",
+     "kind": "money",
+     "cur": 9100.25,
+     "prev": 8700.0,
+     "change": 0.046005747126436784
+    },
+    {
+     "label": "Cost / conv.",
+     "kind": "money",
+     "cur": 29.748602409638554,
+     "prev": 28.950657894736842,
+     "change": 0.02756222389843431
+    },
+    {
+     "label": "Conv. value / cost",
+     "kind": "num",
+     "cur": 7.371207880981753,
+     "prev": 7.908192250880582,
+     "change": -0.06790229079712053
+    },
+    {
+     "label": "Leads",
+     "kind": "num",
+     "cur": 12.0,
+     "prev": 9.0,
+     "change": 0.3333333333333333
+    },
+    {
+     "label": "Leads / Clicks",
+     "kind": "num",
+     "cur": 0.014778325123152709,
+     "prev": 0.01139240506329114,
+     "change": 0.29720853858784885
+    }
+   ]
+  },
+  "vertical": {
+   "rows": [
+    2,
+    3
+   ],
+   "all": [
+    {
+     "label": "Cost",
+     "kind": "money",
+     "cur": 3500.495,
+     "prev": 3600.755,
+     "change": -0.02784416046079231
+    },
+    {
+     "label": "Clicks",
+     "kind": "int",
+     "cur": 2150.0,
+     "prev": 2122.0,
+     "change": 0.013195098963242224
+    },
+    {
+     "label": "Impr.",
+     "kind": "int",
+     "cur": 42001.0,
+     "prev": 41500.0,
+     "change": 0.012072289156626507
+    },
+    {
+     "label": "CTR",
+     "kind": "pct",
+     "cur": 0.051189257398633364,
+     "prev": 0.051132530120481925,
+     "change": 0.0011094166085224848
+    },
+    {
+     "label": "Avg. CPC",
+     "kind": "money",
+     "cur": 1.6281372093023256,
+     "prev": 1.696868520263902,
+     "change": -0.04050479465014005
+    },
+    {
+     "label": "Conversions",
+     "kind": "num",
+     "cur": 100.25,
+     "prev": 97.5,
+     "change": 0.028205128205128206
+    },
+    {
+     "label": "Conv. value",
+     "kind": "money",
+     "cur": 19000.5,
+     "prev": 18301.25,
+     "change": 0.038207772693122054
+    },
+    {
+     "label": "Cost / conv.",
+     "kind": "money",
+     "cur": 34.91765586034913,
+     "prev": 36.93082051282052,
+     "change": -0.05451177700675563
+    },
+    {
+     "label": "Conv. value / cost",
+     "kind": "num",
+     "cur": 5.427946618978173,
+     "prev": 5.082614618323102,
+     "change": 0.06794377039922148
+    },
+    {
+     "label": "Leads",
+     "kind": "num",
+     "cur": 38.0,
+     "prev": 36.0,
+     "change": 0.05555555555555555
+    },
+    {
+     "label": "Leads / Clicks",
+     "kind": "num",
+     "cur": 0.017674418604651163,
+     "prev": 0.016965127238454288,
+     "change": 0.04180878552971584
+    }
+   ],
+   "some": [
+    {
+     "label": "Cost",
+     "kind": "money",
+     "cur": 2500.5,
+     "prev": 2600.75,
+     "change": -0.03854657310391233
+    },
+    {
+     "label": "Clicks",
+     "kind": "int",
+     "cur": 1500.0,
+     "prev": 1420.0,
+     "change": 0.056338028169014086
+    },
+    {
+     "label": "Impr.",
+     "kind": "int",
+     "cur": 30001.0,
+     "prev": 29000.0,
+     "change": 0.034517241379310344
+    },
+    {
+     "label": "CTR",
+     "kind": "pct",
+     "cur": 0.04999833338888704,
+     "prev": 0.04896551724137931,
+     "change": 0.021092724139242316
+    },
+    {
+     "label": "Avg. CPC",
+     "kind": "money",
+     "cur": 1.667,
+     "prev": 1.8315140845070423,
+     "change": -0.08982408920503702
+    },
+    {
+     "label": "Conversions",
+     "kind": "num",
+     "cur": 80.25,
+     "prev": 75.5,
+     "change": 0.06291390728476821
+    },
+    {
+     "label": "Conv. value",
+     "kind": "money",
+     "cur": 15000.5,
+     "prev": 14200.75,
+     "change": 0.056317448022111506
+    },
+    {
+     "label": "Cost / conv.",
+     "kind": "money",
+     "cur": 31.1588785046729,
+     "prev": 34.44701986754967,
+     "change": -0.0954550313937119
+    },
+    {
+     "label": "Conv. value / cost",
+     "kind": "num",
+     "cur": 5.999000199960008,
+     "prev": 5.4602518504277615,
+     "change": 0.09866730771585941
+    },
+    {
+     "label": "Leads",
+     "kind": "num",
+     "cur": 30.0,
+     "prev": 25.0,
+     "change": 0.2
+    },
+    {
+     "label": "Leads / Clicks",
+     "kind": "num",
+     "cur": 0.02,
+     "prev": 0.017605633802816902,
+     "change": 0.13599999999999998
+    }
+   ]
+  },
+  "campus": {
+   "rows": [
+    4,
+    5
+   ],
+   "all": [
+    {
+     "label": "Cost",
+     "kind": "money",
+     "cur": 410.4,
+     "prev": 392.7,
+     "change": 0.04507257448433916
+    },
+    {
+     "label": "Clicks",
+     "kind": "int",
+     "cur": 220.0,
+     "prev": 236.0,
+     "change": -0.06779661016949153
+    },
+    {
+     "label": "Impr.",
+     "kind": "int",
+     "cur": 5100.0,
+     "prev": 5020.0,
+     "change": 0.01593625498007968
+    },
+    {
+     "label": "CTR",
+     "kind": "pct",
+     "cur": 0.043137254901960784,
+     "prev": 0.04701195219123506,
+     "change": -0.08241940844134263
+    },
+    {
+     "label": "Avg. CPC",
+     "kind": "money",
+     "cur": 1.8654545454545453,
+     "prev": 1.6639830508474576,
+     "change": 0.12107785262865468
+    },
+    {
+     "label": "Conversions",
+     "kind": "num",
+     "cur": 9.0,
+     "prev": 8.0,
+     "change": 0.125
+    },
+    {
+     "label": "Conv. value",
+     "kind": "money",
+     "cur": 1800.0,
+     "prev": 1550.0,
+     "change": 0.16129032258064516
+    },
+    {
+     "label": "Cost / conv.",
+     "kind": "money",
+     "cur": 45.599999999999994,
+     "prev": 49.0875,
+     "change": -0.07104660045836525
+    },
+    {
+     "label": "Conv. value / cost",
+     "kind": "num",
+     "cur": 4.385964912280702,
+     "prev": 3.947033358798065,
+     "change": 0.1112054329371817
+    },
+    {
+     "label": "Leads",
+     "kind": "num",
+     "cur": 4.0,
+     "prev": 3.0,
+     "change": 0.3333333333333333
+    },
+    {
+     "label": "Leads / Clicks",
+     "kind": "num",
+     "cur": 0.01818181818181818,
+     "prev": 0.012711864406779662,
+     "change": 0.43030303030303013
+    }
+   ],
+   "some": [
+    {
+     "label": "Cost",
+     "kind": "money",
+     "cur": 410.4,
+     "prev": 380.2,
+     "change": 0.07943187795896893
+    },
+    {
+     "label": "Clicks",
+     "kind": "int",
+     "cur": 220.0,
+     "prev": 230.0,
+     "change": -0.043478260869565216
+    },
+    {
+     "label": "Impr.",
+     "kind": "int",
+     "cur": 5100.0,
+     "prev": 4900.0,
+     "change": 0.04081632653061224
+    },
+    {
+     "label": "CTR",
+     "kind": "pct",
+     "cur": 0.043137254901960784,
+     "prev": 0.04693877551020408,
+     "change": -0.08098891730605288
+    },
+    {
+     "label": "Avg. CPC",
+     "kind": "money",
+     "cur": 1.8654545454545453,
+     "prev": 1.6530434782608696,
+     "change": 0.12849696332074012
+    },
+    {
+     "label": "Conversions",
+     "kind": "num",
+     "cur": 9.0,
+     "prev": 7.5,
+     "change": 0.2
+    },
+    {
+     "label": "Conv. value",
+     "kind": "money",
+     "cur": 1800.0,
+     "prev": 1500.0,
+     "change": 0.2
+    },
+    {
+     "label": "Cost / conv.",
+     "kind": "money",
+     "cur": 45.599999999999994,
+     "prev": 50.693333333333335,
+     "change": -0.10047343503419268
+    },
+    {
+     "label": "Conv. value / cost",
+     "kind": "num",
+     "cur": 4.385964912280702,
+     "prev": 3.945291951604419,
+     "change": 0.11169590643274856
+    },
+    {
+     "label": "Leads",
+     "kind": "num",
+     "cur": 4.0,
+     "prev": 3.0,
+     "change": 0.3333333333333333
+    },
+    {
+     "label": "Leads / Clicks",
+     "kind": "num",
+     "cur": 0.01818181818181818,
+     "prev": 0.013043478260869565,
+     "change": 0.3939393939393939
+    }
+   ]
+  },
+  "generic": {
+   "rows": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "all": [
+    {
+     "label": "Cost",
+     "kind": "money",
+     "cur": 5145.5869999999995,
+     "prev": 5093.955,
+     "change": 0.010135935633510623
+    },
+    {
+     "label": "Clicks",
+     "kind": "int",
+     "cur": 3183.0,
+     "prev": 3151.0,
+     "change": 0.010155506188511583
+    },
+    {
+     "label": "Impr.",
+     "kind": "int",
+     "cur": 62371.0,
+     "prev": 61552.0,
+     "change": 0.01330582271900182
+    },
+    {
+     "label": "CTR",
+     "kind": "pct",
+     "cur": 0.05103333279889692,
+     "prev": 0.051192487652716404,
+     "change": -0.0031089494009193135
+    },
+    {
+     "label": "Avg. CPC",
+     "kind": "money",
+     "cur": 1.6165840402136349,
+     "prev": 1.6166153602031101,
+     "change": -1.9373804212350545e-05
+    },
+    {
+     "label": "Conversions",
+     "kind": "num",
+     "cur": 150.75,
+     "prev": 143.5,
+     "change": 0.050522648083623695
+    },
+    {
+     "label": "Conv. value",
+     "kind": "money",
+     "cur": 29900.75,
+     "prev": 28551.25,
+     "change": 0.04726588152882973
+    },
+    {
+     "label": "Cost / conv.",
+     "kind": "money",
+     "cur": 34.13324709784411,
+     "prev": 35.49794425087108,
+     "change": -0.038444399579377855
+    },
+    {
+     "label": "Conv. value / cost",
+     "kind": "num",
+     "cur": 5.810950237553072,
+     "prev": 5.604927801678657,
+     "change": 0.03675737550316216
+    },
+    {
+     "label": "Leads",
+     "kind": "num",
+     "cur": 54.0,
+     "prev": 49.0,
+     "change": 0.10204081632653061
+    },
+    {
+     "label": "Leads / Clicks",
+     "kind": "num",
+     "cur": 0.016965127238454288,
+     "prev": 0.015550618851158363,
+     "change": 0.09096154955856037
+    }
+   ],
+   "some": [
+    {
+     "label": "Cost",
+     "kind": "money",
+     "cur": 4145.467,
+     "prev": 4081.075,
+     "change": 0.015778195695986923
+    },
+    {
+     "label": "Clicks",
+     "kind": "int",
+     "cur": 2532.0,
+     "prev": 2440.0,
+     "change": 0.03770491803278689
+    },
+    {
+     "label": "Impr.",
+     "kind": "int",
+     "cur": 50331.0,
+     "prev": 48880.0,
+     "change": 0.02968494271685761
+    },
+    {
+     "label": "CTR",
+     "kind": "pct",
+     "cur": 0.05030696787268284,
+     "prev": 0.04991816693944354,
+     "change": 0.0077887662363676155
+    },
+    {
+     "label": "Avg. CPC",
+     "kind": "money",
+     "cur": 1.6372302527646128,
+     "prev": 1.6725717213114752,
+     "change": -0.021130016785857766
+    },
+    {
+     "label": "Conversions",
+     "kind": "num",
+     "cur": 130.75,
+     "prev": 121.0,
+     "change": 0.08057851239669421
+    },
+    {
+     "label": "Conv. value",
+     "kind": "money",
+     "cur": 25900.75,
+     "prev": 24400.75,
+     "change": 0.0614735202811389
+    },
+    {
+     "label": "Cost / conv.",
+     "kind": "money",
+     "cur": 31.70529254302103,
+     "prev": 33.72789256198347,
+     "change": -0.05996817071346514
+    },
+    {
+     "label": "Conv. value / cost",
+     "kind": "num",
+     "cur": 6.247969167285617,
+     "prev": 5.979000630961205,
+     "change": 0.04498553402580446
+    },
+    {
+     "label": "Leads",
+     "kind": "num",
+     "cur": 46.0,
+     "prev": 37.0,
+     "change": 0.24324324324324326
+    },
+    {
+     "label": "Leads / Clicks",
+     "kind": "num",
+     "cur": 0.018167456556082148,
+     "prev": 0.015163934426229509,
+     "change": 0.19807010802271455
+    }
+   ]
+  }
+ },
+ "copy": [
+  {
+   "options": {
+    "decSep": ".",
+    "withLabels": false,
+    "withChange": false,
+    "withHeader": false
+   },
+   "segment": "$1,234.69\t$1,100.50\n813\t793\n15270\t15032\n5.32%\t5.28%\n$1.52\t$1.39\n41.50\t38\n$9,100.25\t$8,700.00\n$29.75\t$28.96\n7.37\t7.91\n12\t10\n0.01\t0.01",
+   "side": "$1,234.57\t$1,100.12\t$2,500.50\t$2,600.75\t$410.40\t$380.20\t$4,145.47\t$4,081.07\n812\t790\t1500\t1420\t220\t230\t2532\t2440\n15230\t14980\t30001\t29000\t5100\t4900\t50331\t48880\n5.33%\t5.27%\t5.00%\t4.90%\t4.31%\t4.69%\t5.03%\t4.99%\n$1.52\t$1.39\t$1.67\t$1.83\t$1.87\t$1.65\t$1.64\t$1.67\n41.50\t38\t80.25\t75.50\t9\t7.50\t130.75\t121\n$9,100.25\t$8,700.00\t$15,000.50\t$14,200.75\t$1,800.00\t$1,500.00\t$25,900.75\t$24,400.75\n$29.75\t$28.95\t$31.16\t$34.45\t$45.60\t$50.69\t$31.71\t$33.73\n7.37\t7.91\t6.00\t5.46\t4.39\t3.95\t6.25\t5.98\n12\t9\t30\t25\t4\t3\t46\t37\n0.01\t0.01\t0.02\t0.02\t0.02\t0.01\t0.02\t0.02",
+   "stacked": "$1,234.69\t$1,100.50\n813\t793\n15270\t15032\n5.32%\t5.28%\n$1.52\t$1.39\n41.50\t38\n$9,100.25\t$8,700.00\n$29.75\t$28.96\n7.37\t7.91\n12\t10\n0.01\t0.01\n\n$3,500.49\t$3,600.76\n2150\t2122\n42001\t41500\n5.12%\t5.11%\n$1.63\t$1.70\n100.25\t97.50\n$19,000.50\t$18,301.25\n$34.92\t$36.93\n5.43\t5.08\n38\t36\n0.02\t0.02\n\n$410.40\t$392.70\n220\t236\n5100\t5020\n4.31%\t4.70%\n$1.87\t$1.66\n9\t8\n$1,800.00\t$1,550.00\n$45.60\t$49.09\n4.39\t3.95\n4\t3\n0.02\t0.01\n\n$5,145.59\t$5,093.95\n3183\t3151\n62371\t61552\n5.10%\t5.12%\n$1.62\t$1.62\n150.75\t143.50\n$29,900.75\t$28,551.25\n$34.13\t$35.50\n5.81\t5.60\n54\t49\n0.02\t0.02"
+  },
+  {
+   "options": {
+    "decSep": ",",
+    "withLabels": true,
+    "withChange": true,
+    "withHeader": true
+   },
+   "segment": "Metric\tCurrent\tCompared\tChange %\nCost\t$1.234,69\t$1.100,50\t12,19%\nClicks\t813\t793\t2,52%\nImpr.\t15270\t15032\t1,58%\nCTR\t5,32%\t5,28%\t0,92%\nAvg. CPC\t$1,52\t$1,39\t9,43%\nConversions\t41,50\t38\t9,21%\nConv. value\t$9.100,25\t$8.700,00\t4,60%\nCost / conv.\t$29,75\t$28,96\t2,73%\nConv. value / cost\t7,37\t7,91\t-6,77%\nLeads\t12\t10\t20,00%\nLeads / Clicks\t0,01\t0,01\t17,05%",
+   "side": "Metric\tPost-L - Current\tPost-L - Compared\tPost-L - Change %\tPre-L Vertical - Current\tPre-L Vertical - Compared\tPre-L Vertical - Change %\tPre-L Campus - Current\tPre-L Campus - Compared\tPre-L Campus - Change %\tGeneric overall - Current\tGeneric overall - Compared\tGeneric overall - Change %\nCost\t$1.234,57\t$1.100,12\t12,22%\t$2.500,50\t$2.600,75\t-3,85%\t$410,40\t$380,20\t7,94%\t$4.145,47\t$4.081,07\t1,58%\nClicks\t812\t790\t2,78%\t1500\t1420\t5,63%\t220\t230\t-4,35%\t2532\t2440\t3,77%\nImpr.\t15230\t14980\t1,67%\t30001\t29000\t3,45%\t5100\t4900\t4,08%\t50331\t48880\t2,97%\nCTR\t5,33%\t5,27%\t1,10%\t5,00%\t4,90%\t2,11%\t4,31%\t4,69%\t-8,10%\t5,03%\t4,99%\t0,78%\nAvg. CPC\t$1,52\t$1,39\t9,18%\t$1,67\t$1,83\t-8,98%\t$1,87\t$1,65\t12,85%\t$1,64\t$1,67\t-2,11%\nConversions\t41,50\t38\t9,21%\t80,25\t75,50\t6,29%\t9\t7,50\t20,00%\t130,75\t121\t8,06%\nConv. value\t$9.100,25\t$8.700,00\t4,60%\t$15.000,50\t$14.200,75\t5,63%\t$1.800,00\t$1.500,00\t20,00%\t$25.900,75\t$24.400,75\t6,15%\nCost / conv.\t$29,75\t$28,95\t2,76%\t$31,16\t$34,45\t-9,55%\t$45,60\t$50,69\t-10,05%\t$31,71\t$33,73\t-6,00%\nConv. value / cost\t7,37\t7,91\t-6,79%\t6,00\t5,46\t9,87%\t4,39\t3,95\t11,17%\t6,25\t5,98\t4,50%\nLeads\t12\t9\t33,33%\t30\t25\t20,00%\t4\t3\t33,33%\t46\t37\t24,32%\nLeads / Clicks\t0,01\t0,01\t29,72%\t0,02\t0,02\t13,60%\t0,02\t0,01\t39,39%\t0,02\t0,02\t19,81%",
+   "stacked": "Post-L\nMetric\tCurrent\tCompared\tChange %\nCost\t$1.234,69\t$1.100,50\t12,19%\nClicks\t813\t793\t2,52%\nImpr.\t15270\t15032\t1,58%\nCTR\t5,32%\t5,28%\t0,92%\nAvg. CPC\t$1,52\t$1,39\t9,43%\nConversions\t41,50\t38\t9,21%\nConv. value\t$9.100,25\t$8.700,00\t4,60%\nCost / conv.\t$29,75\t$28,96\t2,73%\nConv. value / cost\t7,37\t7,91\t-6,77%\nLeads\t12\t10\t20,00%\nLeads / Clicks\t0,01\t0,01\t17,05%\n\nPre-L Vertical\nMetric\tCurrent\tCompared\tChange %\nCost\t$3.500,49\t$3.600,76\t-2,78%\nClicks\t2150\t2122\t1,32%\nImpr.\t42001\t41500\t1,21%\nCTR\t5,12%\t5,11%\t0,11%\nAvg. CPC\t$1,63\t$1,70\t-4,05%\nConversions\t100,25\t97,50\t2,82%\nConv. value\t$19.000,50\t$18.301,25\t3,82%\nCost / conv.\t$34,92\t$36,93\t-5,45%\nConv. value / cost\t5,43\t5,08\t6,79%\nLeads\t38\t36\t5,56%\nLeads / Clicks\t0,02\t0,02\t4,18%\n\nPre-L Campus\nMetric\tCurrent\tCompared\tChange %\nCost\t$410,40\t$392,70\t4,51%\nClicks\t220\t236\t-6,78%\nImpr.\t5100\t5020\t1,59%\nCTR\t4,31%\t4,70%\t-8,24%\nAvg. CPC\t$1,87\t$1,66\t12,11%\nConversions\t9\t8\t12,50%\nConv. value\t$1.800,00\t$1.550,00\t16,13%\nCost / conv.\t$45,60\t$49,09\t-7,10%\nConv. value / cost\t4,39\t3,95\t11,12%\nLeads\t4\t3\t33,33%\nLeads / Clicks\t0,02\t0,01\t43,03%\n\nGeneric overall\nMetric\tCurrent\tCompared\tChange %\nCost\t$5.145,59\t$5.093,95\t1,01%\nClicks\t3183\t3151\t1,02%\nImpr.\t62371\t61552\t1,33%\nCTR\t5,10%\t5,12%\t-0,31%\nAvg. CPC\t$1,62\t$1,62\t-0,00%\nConversions\t150,75\t143,50\t5,05%\nConv. value\t$29.900,75\t$28.551,25\t4,73%\nCost / conv.\t$34,13\t$35,50\t-3,84%\nConv. value / cost\t5,81\t5,60\t3,68%\nLeads\t54\t49\t10,20%\nLeads / Clicks\t0,02\t0,02\t9,10%"
+  }
+ ]
+}
