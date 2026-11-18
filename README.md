@@ -45,3 +45,12 @@ python generic_performance.py
 ```
 
 To build `dist\Generic-Performance.exe`, double-click `build_exe.bat`. It creates a local `.venv` and runs PyInstaller.
+
+## Download the exe (no Python needed)
+
+The exe bundles Python and every dependency, so users only need Windows. Download `Generic-Performance.exe` from the repo's **Releases** page and run it. The exe is unsigned, so on first run Windows may show "Windows protected your PC": click **More info → Run anyway**.
+
+GitHub builds the exe automatically (`.github/workflows/build-exe.yml`):
+
+- **New release:** push a version tag, e.g. `git tag v1.0.0 && git push origin v1.0.0`. The exe is attached to a new release with that name.
+- **Test build without a release:** Actions tab → **Build exe** → **Run workflow**. The exe appears under the run's **Artifacts**.
