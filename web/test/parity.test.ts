@@ -1,9 +1,7 @@
-// Checks the website's calculations against what the desktop app's Python code
-// produced for the same files (tests/expected/*.json, made by tests/dump_python.py).
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { type Kind, fmtValue, toNumber } from "../src/core/numbers";
+import { type Kind, formatValue, toNumber } from "../src/core/numbers";
 import { buildAllSegmentsText, buildClipboardText } from "../src/core/output";
 import { loadReport } from "../src/core/read";
 import { type ResultRow, SEGMENTS, aggregate, missingCompared, segmentOf, segmentRows } from "../src/core/report";
@@ -11,11 +9,14 @@ import { type ResultRow, SEGMENTS, aggregate, missingCompared, segmentOf, segmen
 const ROOT = join(__dirname, "..", "..", "tests");
 const expected = (name: string) => JSON.parse(readFileSync(join(ROOT, "expected", name), "utf-8"));
 
+const FLOATING_POINT_TOLERANCE = 1e-9;
+
 function closeTo(actual: number | null, want: number | null) {
   if (want === null) return expect(actual).toBeNull();
   expect(actual).not.toBeNull();
-  // Same algorithm in both apps; allow only floating-point noise.
-  expect(Math.abs((actual as number) - want)).toBeLessThanOrEqual(1e-9 * Math.max(1, Math.abs(want)));
+  expect(Math.abs((actual as number) - want)).toBeLessThanOrEqual(
+    FLOATING_POINT_TOLERANCE * Math.max(1, Math.abs(want)),
+  );
 }
 
 function compareResults(actual: ResultRow[], want: ResultRow[]) {
@@ -32,7 +33,7 @@ describe("number handling matches the desktop app", () => {
 
   it("formats values the same", () => {
     for (const c of b.fmt) {
-      expect(fmtValue(c.value, c.kind as Kind, c.decSep, c.thousands), JSON.stringify(c)).toBe(c.out);
+      expect(formatValue(c.value, c.kind as Kind, c.decimalSeparator, c.thousands), JSON.stringify(c)).toBe(c.out);
     }
   });
 
@@ -73,7 +74,10 @@ describe.each(fixtures)("%s matches the desktop app", (file) => {
       const idx = segmentRows(rep, seg);
       expect(idx).toEqual(want.segments[seg.key].rows);
       const all = aggregate(rep, idx);
-      const some = aggregate(rep, idx.filter((i) => !excluded.has(i)));
+      const some = aggregate(
+        rep,
+        idx.filter((i) => !excluded.has(i)),
+      );
       compareResults(all, want.segments[seg.key].all);
       compareResults(some, want.segments[seg.key].some);
       blocksAll.push([seg.short, all]);

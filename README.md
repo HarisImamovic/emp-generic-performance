@@ -23,8 +23,8 @@ Every numeric column in the export becomes a metric, in file order. Each one is 
 
 - Additive columns (cost, clicks, impressions, conversions, custom columns, ...) are **summed**.
 - Ratios are **recalculated from the sums**, never averaged. These are marked `ƒ` in the app: Avg. CPC, CTR, Avg. CPM, Conv. rate, Cost / conv., Conv. value / cost, Value / conv., and any `A / B` column whose `A` and `B` are both in the file.
-- Rates that can't be rebuilt from the file, such as impression share, are skipped and named in the status bar.
-- In a comparison export, columns without a `(Compared to)` column are settings, not performance (Budget, target CPA). They are skipped and named in the status bar.
+- Rates that can't be rebuilt from the file, such as impression share, are skipped and listed under the results table.
+- In a comparison export, columns without a `(Compared to)` column are settings, not performance (Budget, target CPA). They are skipped and listed under the results table.
 - ID columns, text columns, `Total:` rows and `% change` columns are ignored.
 
 ## Use
@@ -64,6 +64,7 @@ npm install
 npm run dev      # local server with live reload
 npm test         # compares results with the desktop app
 npm run build    # production build in web/dist
+npm run format   # format the code with Prettier (CI checks this)
 ```
 
 ### Deploy (Cloudflare Pages + Access)

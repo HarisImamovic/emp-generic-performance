@@ -1,169 +1,262 @@
-// Metric column detection. Port of parse_columns in desktop/generic_performance.py.
-import { type Cell, type Kind, isEmpty, norm, toNumber } from "./numbers";
+import { type Cell, type Kind, isEmpty, normalizeKey, toNumber } from "./numbers";
 
 export interface MetricCol {
   label: string;
   kind: Kind;
-  cur: number | null; // column index of the current period
-  prev: number | null; // column index of the compared period
-  derived: [number, number, number] | null; // (numerator idx, denominator idx, factor) into metrics
+  cur: number | null;
+  prev: number | null;
+  derived: [numerator: number, denominator: number, factor: number] | null;
 }
 
-// After a metric's own name, these mark its compared-period column / its delta column.
-const COMPARE_RE = /^(comparedto|compareto|comparison|compared|previousperiod|previous|priorperiod|prior)/;
-const DELTA_START_RE = /^(change|diff|delta|pct|percent)/;
-const DELTA_ANY_RE = /(change|diff|delta|pct|percent)/;
-const ORPHAN_COMPARE_RE = /(comparedto|compareto|comparison|previousperiod|priorperiod)/;
+interface RatioRule {
+  headers: string[];
+  numerators: string[];
+  denominators: string[];
+  factor: number;
+  kind: Kind;
+}
 
-// Ratios that must be recomputed from sums, never summed or averaged:
-// [header norms, numerator norms, denominator norms, factor, kind]
-type Rule = [string[], string[], string[], number, Kind];
-const DERIVED_RULES: Rule[] = [
-  [["avgcpc", "averagecpc", "cpc"], ["cost"], ["clicks"], 1.0, "money"],
-  [["ctr", "clickthroughrate"], ["clicks"], ["impr", "impressions"], 1.0, "pct"],
-  [["avgcpm", "averagecpm", "cpm"], ["cost"], ["impr", "impressions"], 1000.0, "money"],
-  [["convrate", "conversionrate"], ["conversions", "conv"], ["clicks"], 1.0, "pct"],
-  [["costconv", "costperconv", "costperconversion", "cpa"], ["cost"], ["conversions", "conv"], 1.0, "money"],
-  [["convvaluecost", "conversionvaluecost", "roas"], ["convvalue", "conversionvalue"], ["cost"], 1.0, "num"],
-  [["valueconv", "convvalueconv", "valueperconversion"], ["convvalue", "conversionvalue"], ["conversions", "conv"], 1.0, "money"],
-];
-const RATIO_WORDS = /\b(rate|avg|average|share|ctr|cpc|cpm|cpa|roas|per|position|ratio|percent)\b/i;
+interface PendingRatio {
+  metricIndex: number;
+  column: number;
+  numerators: string[];
+  denominators: string[];
+  factor: number;
+  kind: Kind | null;
+}
+
+const COMPARED_SUFFIX = /^(comparedto|compareto|comparison|compared|previousperiod|previous|priorperiod|prior)/;
+const CHANGE_SUFFIX = /^(change|diff|delta|pct|percent)/;
+const CHANGE_WORD = /(change|diff|delta|pct|percent)/;
+const STANDALONE_COMPARED_HEADER = /(comparedto|compareto|comparison|previousperiod|priorperiod)/;
+const RATE_WORDS = /\b(rate|avg|average|share|ctr|cpc|cpm|cpa|roas|per|position|ratio|percent)\b/i;
+const ID_WORD = /\bid\b/i;
+const CURRENCY_SYMBOL = /[$€£]/;
 const MONEY_WORDS = ["cost", "value", "revenue", "sales", "budget", "spend"];
-const COUNT_NORMS = new Set(["clicks", "impr", "impressions", "interactions"]);
-const ID_RE = /\bid\b/i;
+const COUNT_HEADERS = new Set(["clicks", "impr", "impressions", "interactions"]);
+const NUMERIC_SHARE_THRESHOLD = 0.8;
+
+const RATIO_RULES: RatioRule[] = [
+  {
+    headers: ["avgcpc", "averagecpc", "cpc"],
+    numerators: ["cost"],
+    denominators: ["clicks"],
+    factor: 1,
+    kind: "money",
+  },
+  {
+    headers: ["ctr", "clickthroughrate"],
+    numerators: ["clicks"],
+    denominators: ["impr", "impressions"],
+    factor: 1,
+    kind: "pct",
+  },
+  {
+    headers: ["avgcpm", "averagecpm", "cpm"],
+    numerators: ["cost"],
+    denominators: ["impr", "impressions"],
+    factor: 1000,
+    kind: "money",
+  },
+  {
+    headers: ["convrate", "conversionrate"],
+    numerators: ["conversions", "conv"],
+    denominators: ["clicks"],
+    factor: 1,
+    kind: "pct",
+  },
+  {
+    headers: ["costconv", "costperconv", "costperconversion", "cpa"],
+    numerators: ["cost"],
+    denominators: ["conversions", "conv"],
+    factor: 1,
+    kind: "money",
+  },
+  {
+    headers: ["convvaluecost", "conversionvaluecost", "roas"],
+    numerators: ["convvalue", "conversionvalue"],
+    denominators: ["cost"],
+    factor: 1,
+    kind: "num",
+  },
+  {
+    headers: ["valueconv", "convvalueconv", "valueperconversion"],
+    numerators: ["convvalue", "conversionvalue"],
+    denominators: ["conversions", "conv"],
+    factor: 1,
+    kind: "money",
+  },
+];
+
+function firstColumnByKey(keys: string[]): Map<string, number> {
+  const first = new Map<string, number>();
+  keys.forEach((key, column) => {
+    if (key && !first.has(key)) first.set(key, column);
+  });
+  return first;
+}
+
+function longestBaseKey(key: string, baseKeys: Iterable<string>): string | null {
+  let best: string | null = null;
+  for (const base of baseKeys) {
+    if (base === key || !key.startsWith(base)) continue;
+    if (best !== null && base.length <= best.length) continue;
+    const suffix = key.slice(base.length);
+    if (COMPARED_SUFFIX.test(suffix) || CHANGE_SUFFIX.test(suffix)) best = base;
+  }
+  return best;
+}
+
+function pairComparedColumns(keys: string[], first: Map<string, number>) {
+  const comparedColumnOf = new Map<string, number>();
+  const secondaryColumns = new Set<number>();
+  keys.forEach((key, column) => {
+    if (!key) return;
+    const base = longestBaseKey(key, first.keys());
+    if (base === null) return;
+    secondaryColumns.add(column);
+    const suffix = key.slice(base.length);
+    const isComparedValue = COMPARED_SUFFIX.test(suffix) && !CHANGE_WORD.test(suffix);
+    if (isComparedValue && !comparedColumnOf.has(base)) comparedColumnOf.set(base, column);
+  });
+  return { comparedColumnOf, secondaryColumns };
+}
 
 function isNumericColumn(values: Cell[]): boolean {
   const filled = values.filter((v) => !isEmpty(v));
   if (!filled.length) return false;
-  const nums = filled.filter((v) => toNumber(v) !== null).length;
-  return nums >= 0.8 * filled.length;
+  const numeric = filled.filter((v) => toNumber(v) !== null).length;
+  return numeric >= NUMERIC_SHARE_THRESHOLD * filled.length;
 }
 
-function baseKind(n: string, raw: Cell[]): Kind {
-  if (COUNT_NORMS.has(n)) return "int";
-  if (raw.some((v) => typeof v === "string" && /[$€£]/.test(v))) return "money";
-  if (MONEY_WORDS.some((w) => n.includes(w))) return "money";
+function additiveKind(key: string, values: Cell[]): Kind {
+  if (COUNT_HEADERS.has(key)) return "int";
+  if (values.some((v) => typeof v === "string" && CURRENCY_SYMBOL.test(v))) return "money";
+  if (MONEY_WORDS.some((word) => key.includes(word))) return "money";
   return "num";
 }
 
-/**
- * Every numeric column in the export becomes a metric (file order).
- * Returns metrics and the columns that were skipped (rates that can't be rebuilt,
- * or settings with no compared column in a comparison export).
- */
+function looksLikeRate(label: string, values: Cell[]): boolean {
+  return (
+    RATE_WORDS.test(label) || label.includes("%") || values.some((v) => typeof v === "string" && v.trim().endsWith("%"))
+  );
+}
+
+function splitRatioLabel(label: string): [string, string] | null {
+  const parts = label.split("/");
+  if (parts.length !== 2) return null;
+  const [numerator, denominator] = parts.map((part) => normalizeKey(part));
+  return numerator && denominator ? [numerator, denominator] : null;
+}
+
+function findAdditiveMetric(metrics: MetricCol[], candidates: string[]): number | null {
+  for (const candidate of candidates) {
+    const index = metrics.findIndex(
+      (m) => m.derived === null && m.kind !== "pct" && normalizeKey(m.label) === candidate,
+    );
+    if (index !== -1) return index;
+  }
+  return null;
+}
+
+function ratioKind(metrics: MetricCol[], numerator: number, denominator: number): Kind {
+  const isMoneyPerUnit = metrics[numerator].kind === "money" && metrics[denominator].kind !== "money";
+  return isMoneyPerUnit ? "money" : "num";
+}
+
+function removeMetrics(metrics: MetricCol[], removed: Set<number>): MetricCol[] {
+  const newIndex = new Map<number, number>();
+  const kept = metrics.filter((_, index) => {
+    if (removed.has(index)) return false;
+    newIndex.set(index, newIndex.size);
+    return true;
+  });
+  for (const metric of kept) {
+    if (!metric.derived) continue;
+    const [numerator, denominator, factor] = metric.derived;
+    metric.derived = [newIndex.get(numerator)!, newIndex.get(denominator)!, factor];
+  }
+  return kept;
+}
+
 export function parseColumns(
   header: Cell[],
   rows: Cell[][],
   campaignCol: number | null,
 ): { metrics: MetricCol[]; skipped: string[] } {
   const labels = header.map((h) => (h === null ? "" : String(h).trim()));
-  const norms = header.map((h) => norm(h));
-  const first = new Map<string, number>();
-  norms.forEach((n, j) => {
-    if (n && !first.has(n)) first.set(n, j);
-  });
+  const keys = header.map((h) => normalizeKey(h));
+  const first = firstColumnByKey(keys);
+  const { comparedColumnOf, secondaryColumns } = pairComparedColumns(keys, first);
+  const columnValues = (column: number): Cell[] => rows.map((row) => (column < row.length ? row[column] : null));
 
-  // pair "<metric> (Compared to)" with "<metric>"; drop "<metric> (% change)"
-  const prevOf = new Map<string, number>();
-  const secondary = new Set<number>();
-  norms.forEach((n, j) => {
-    if (!n) return;
-    let best: string | null = null;
-    for (const b of first.keys()) {
-      if (b !== n && n.startsWith(b) && (best === null || b.length > best.length)) {
-        const rest = n.slice(b.length);
-        if (COMPARE_RE.test(rest) || DELTA_START_RE.test(rest)) best = b;
-      }
-    }
-    if (best === null) return;
-    secondary.add(j);
-    const rest = n.slice(best.length);
-    if (COMPARE_RE.test(rest) && !DELTA_ANY_RE.test(rest) && !prevOf.has(best)) prevOf.set(best, j);
-  });
-
-  const colValues = (j: number): Cell[] => rows.map((r) => (j < r.length ? r[j] : null));
-
-  // numeric base columns, file order
-  const bases: number[] = [];
-  for (const [n, j] of first) {
-    if (secondary.has(j) || j === campaignCol || ID_RE.test(labels[j]) || ORPHAN_COMPARE_RE.test(n)) continue;
-    if (isNumericColumn(colValues(j))) bases.push(j);
-  }
-  bases.sort((a, b) => a - b);
+  const baseColumns = [...first]
+    .filter(
+      ([key, column]) =>
+        !secondaryColumns.has(column) &&
+        column !== campaignCol &&
+        !ID_WORD.test(labels[column]) &&
+        !STANDALONE_COMPARED_HEADER.test(key) &&
+        isNumericColumn(columnValues(column)),
+    )
+    .map(([, column]) => column)
+    .sort((a, b) => a - b);
 
   const metrics: MetricCol[] = [];
   const skipped: string[] = [];
-  const pending: [number, number, string[], string[], number, Kind | ""][] = [];
-  const prevFor = (n: string) => prevOf.get(n) ?? null;
+  const pending: PendingRatio[] = [];
+  const isComparisonExport = comparedColumnOf.size > 0;
 
-  const additiveByNorm = (cands: string[]): number | null => {
-    for (const c of cands) {
-      for (let k = 0; k < metrics.length; k++) {
-        const m = metrics[k];
-        if (m.derived === null && m.kind !== "pct" && norm(m.label) === c) return k;
-      }
-    }
-    return null;
+  const addMetric = (column: number, kind: Kind) => {
+    const key = keys[column];
+    metrics.push({ label: labels[column], kind, cur: column, prev: comparedColumnOf.get(key) ?? null, derived: null });
+    return metrics.length - 1;
   };
 
-  for (const j of bases) {
-    const n = norms[j];
-    const raw = colValues(j);
-    const rule = DERIVED_RULES.find((r) => r[0].includes(n));
-    const parts = labels[j].split("/");
+  for (const column of baseColumns) {
+    const key = keys[column];
+    const label = labels[column];
+    const values = columnValues(column);
+    const rule = RATIO_RULES.find((r) => r.headers.includes(key));
+    const ratioParts = splitRatioLabel(label);
+
     if (rule) {
-      metrics.push({ label: labels[j], kind: rule[4], cur: j, prev: prevFor(n), derived: null });
-      pending.push([metrics.length - 1, j, rule[1], rule[2], rule[3], rule[4]]);
-    } else if (parts.length === 2 && parts.every((p) => norm(p))) {
-      metrics.push({ label: labels[j], kind: "num", cur: j, prev: prevFor(n), derived: null });
-      pending.push([metrics.length - 1, j, [norm(parts[0])], [norm(parts[1])], 1.0, ""]);
-    } else if (
-      RATIO_WORDS.test(labels[j]) ||
-      labels[j].includes("%") ||
-      raw.some((v) => typeof v === "string" && v.trim().endsWith("%"))
-    ) {
-      metrics.push({ label: labels[j], kind: "pct", cur: j, prev: prevFor(n), derived: null });
-      pending.push([metrics.length - 1, j, [], [], 1.0, "pct"]);
-    } else if (prevOf.size && !prevOf.has(n)) {
-      // comparison export, but this column has none: a setting (Budget, target CPA), not performance
-      skipped.push(`${labels[j]} (no compared column)`);
+      const { numerators, denominators, factor, kind } = rule;
+      pending.push({ metricIndex: addMetric(column, kind), column, numerators, denominators, factor, kind });
+    } else if (ratioParts) {
+      const [numerator, denominator] = ratioParts;
+      const metricIndex = addMetric(column, "num");
+      pending.push({
+        metricIndex,
+        column,
+        numerators: [numerator],
+        denominators: [denominator],
+        factor: 1,
+        kind: null,
+      });
+    } else if (looksLikeRate(label, values)) {
+      const metricIndex = addMetric(column, "pct");
+      pending.push({ metricIndex, column, numerators: [], denominators: [], factor: 1, kind: "pct" });
+    } else if (isComparisonExport && !comparedColumnOf.has(key)) {
+      skipped.push(`${label} (no compared column)`);
     } else {
-      metrics.push({ label: labels[j], kind: baseKind(n, raw), cur: j, prev: prevFor(n), derived: null });
+      addMetric(column, additiveKind(key, values));
     }
   }
 
-  const drop = new Set<number>();
-  for (const [k, j, num, den, factor, kindIn] of pending) {
-    const a = additiveByNorm(num);
-    const b = additiveByNorm(den);
-    if (a === null || b === null) {
-      drop.add(k);
-      skipped.push(`${labels[j]} (not summable)`);
+  const unresolved = new Set<number>();
+  for (const ratio of pending) {
+    const numerator = findAdditiveMetric(metrics, ratio.numerators);
+    const denominator = findAdditiveMetric(metrics, ratio.denominators);
+    if (numerator === null || denominator === null) {
+      unresolved.add(ratio.metricIndex);
+      skipped.push(`${labels[ratio.column]} (not summable)`);
       continue;
     }
-    let kind = kindIn;
-    if (!kind) {
-      // generic "A / B" column
-      kind = metrics[a].kind === "money" && metrics[b].kind !== "money" ? "money" : "num";
-    }
-    metrics[k].kind = kind;
-    metrics[k].derived = [a, b, factor];
+    const metric = metrics[ratio.metricIndex];
+    metric.kind = ratio.kind ?? ratioKind(metrics, numerator, denominator);
+    metric.derived = [numerator, denominator, ratio.factor];
   }
 
-  // drop non-aggregatable columns and re-point derived indices
-  const remap = new Map<number, number>();
-  const kept: MetricCol[] = [];
-  metrics.forEach((m, k) => {
-    if (!drop.has(k)) {
-      remap.set(k, kept.length);
-      kept.push(m);
-    }
-  });
-  for (const m of kept) {
-    if (m.derived) {
-      const [a, b, f] = m.derived;
-      m.derived = [remap.get(a)!, remap.get(b)!, f];
-    }
-  }
-  return { metrics: kept, skipped };
+  return { metrics: removeMetrics(metrics, unresolved), skipped };
 }

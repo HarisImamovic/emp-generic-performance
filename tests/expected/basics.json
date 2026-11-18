@@ -3,2352 +3,2352 @@
   {
    "value": null,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": ""
   },
   {
    "value": null,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": ""
   },
   {
    "value": null,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": ""
   },
   {
    "value": null,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": ""
   },
   {
    "value": null,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": ""
   },
   {
    "value": null,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": ""
   },
   {
    "value": null,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": ""
   },
   {
    "value": null,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": ""
   },
   {
    "value": null,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": ""
   },
   {
    "value": null,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": ""
   },
   {
    "value": null,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": ""
   },
   {
    "value": null,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": ""
   },
   {
    "value": null,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": ""
   },
   {
    "value": null,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": ""
   },
   {
    "value": null,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": ""
   },
   {
    "value": null,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": ""
   },
   {
    "value": 0.0,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$0.00"
   },
   {
    "value": 0.0,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$0.00"
   },
   {
    "value": 0.0,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$0,00"
   },
   {
    "value": 0.0,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$0,00"
   },
   {
    "value": 0.0,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.0,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.0,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.0,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.0,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.0,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.0,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.0,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.0,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0.00%"
   },
   {
    "value": 0.0,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0.00%"
   },
   {
    "value": 0.0,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0,00%"
   },
   {
    "value": 0.0,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0,00%"
   },
   {
    "value": -0.0,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-$0.00"
   },
   {
    "value": -0.0,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-$0.00"
   },
   {
    "value": -0.0,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-$0,00"
   },
   {
    "value": -0.0,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-$0,00"
   },
   {
    "value": -0.0,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": -0.0,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": -0.0,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": -0.0,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": -0.0,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": -0.0,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": -0.0,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": -0.0,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": -0.0,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-0.00%"
   },
   {
    "value": -0.0,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-0.00%"
   },
   {
    "value": -0.0,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-0,00%"
   },
   {
    "value": -0.0,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-0,00%"
   },
   {
    "value": 0.125,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$0.12"
   },
   {
    "value": 0.125,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$0.12"
   },
   {
    "value": 0.125,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$0,12"
   },
   {
    "value": 0.125,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$0,12"
   },
   {
    "value": 0.125,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.125,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.125,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.125,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.125,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0.12"
   },
   {
    "value": 0.125,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0.12"
   },
   {
    "value": 0.125,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0,12"
   },
   {
    "value": 0.125,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0,12"
   },
   {
    "value": 0.125,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "12.50%"
   },
   {
    "value": 0.125,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "12.50%"
   },
   {
    "value": 0.125,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "12,50%"
   },
   {
    "value": 0.125,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "12,50%"
   },
   {
    "value": 0.375,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$0.38"
   },
   {
    "value": 0.375,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$0.38"
   },
   {
    "value": 0.375,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$0,38"
   },
   {
    "value": 0.375,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$0,38"
   },
   {
    "value": 0.375,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.375,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.375,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.375,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.375,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0.38"
   },
   {
    "value": 0.375,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0.38"
   },
   {
    "value": 0.375,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0,38"
   },
   {
    "value": 0.375,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0,38"
   },
   {
    "value": 0.375,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "37.50%"
   },
   {
    "value": 0.375,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "37.50%"
   },
   {
    "value": 0.375,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "37,50%"
   },
   {
    "value": 0.375,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "37,50%"
   },
   {
    "value": 2.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$2.50"
   },
   {
    "value": 2.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$2.50"
   },
   {
    "value": 2.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$2,50"
   },
   {
    "value": 2.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$2,50"
   },
   {
    "value": 2.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "2"
   },
   {
    "value": 2.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "2"
   },
   {
    "value": 2.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "2"
   },
   {
    "value": 2.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "2"
   },
   {
    "value": 2.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "2.50"
   },
   {
    "value": 2.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "2.50"
   },
   {
    "value": 2.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "2,50"
   },
   {
    "value": 2.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "2,50"
   },
   {
    "value": 2.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "250.00%"
   },
   {
    "value": 2.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "250.00%"
   },
   {
    "value": 2.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "250,00%"
   },
   {
    "value": 2.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "250,00%"
   },
   {
    "value": 3.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$3.50"
   },
   {
    "value": 3.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$3.50"
   },
   {
    "value": 3.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$3,50"
   },
   {
    "value": 3.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$3,50"
   },
   {
    "value": 3.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "4"
   },
   {
    "value": 3.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "4"
   },
   {
    "value": 3.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "4"
   },
   {
    "value": 3.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "4"
   },
   {
    "value": 3.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "3.50"
   },
   {
    "value": 3.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "3.50"
   },
   {
    "value": 3.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "3,50"
   },
   {
    "value": 3.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "3,50"
   },
   {
    "value": 3.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "350.00%"
   },
   {
    "value": 3.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "350.00%"
   },
   {
    "value": 3.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "350,00%"
   },
   {
    "value": 3.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "350,00%"
   },
   {
    "value": -2.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-$2.50"
   },
   {
    "value": -2.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-$2.50"
   },
   {
    "value": -2.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-$2,50"
   },
   {
    "value": -2.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-$2,50"
   },
   {
    "value": -2.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-2"
   },
   {
    "value": -2.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-2"
   },
   {
    "value": -2.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-2"
   },
   {
    "value": -2.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-2"
   },
   {
    "value": -2.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-2.50"
   },
   {
    "value": -2.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-2.50"
   },
   {
    "value": -2.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-2,50"
   },
   {
    "value": -2.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-2,50"
   },
   {
    "value": -2.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-250.00%"
   },
   {
    "value": -2.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-250.00%"
   },
   {
    "value": -2.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-250,00%"
   },
   {
    "value": -2.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-250,00%"
   },
   {
    "value": 0.005,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$0.01"
   },
   {
    "value": 0.005,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$0.01"
   },
   {
    "value": 0.005,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$0,01"
   },
   {
    "value": 0.005,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$0,01"
   },
   {
    "value": 0.005,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.005,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.005,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.005,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.005,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0.01"
   },
   {
    "value": 0.005,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0.01"
   },
   {
    "value": 0.005,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0,01"
   },
   {
    "value": 0.005,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0,01"
   },
   {
    "value": 0.005,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0.50%"
   },
   {
    "value": 0.005,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0.50%"
   },
   {
    "value": 0.005,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0,50%"
   },
   {
    "value": 0.005,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0,50%"
   },
   {
    "value": 1.005,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$1.00"
   },
   {
    "value": 1.005,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$1.00"
   },
   {
    "value": 1.005,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$1,00"
   },
   {
    "value": 1.005,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$1,00"
   },
   {
    "value": 1.005,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "1"
   },
   {
    "value": 1.005,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "1"
   },
   {
    "value": 1.005,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "1"
   },
   {
    "value": 1.005,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "1"
   },
   {
    "value": 1.005,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "1.00"
   },
   {
    "value": 1.005,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "1.00"
   },
   {
    "value": 1.005,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "1,00"
   },
   {
    "value": 1.005,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "1,00"
   },
   {
    "value": 1.005,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "100.50%"
   },
   {
    "value": 1.005,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "100.50%"
   },
   {
    "value": 1.005,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "100,50%"
   },
   {
    "value": 1.005,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "100,50%"
   },
   {
    "value": 1234567.895,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$1234567.90"
   },
   {
    "value": 1234567.895,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$1,234,567.90"
   },
   {
    "value": 1234567.895,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$1234567,90"
   },
   {
    "value": 1234567.895,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$1.234.567,90"
   },
   {
    "value": 1234567.895,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "1234568"
   },
   {
    "value": 1234567.895,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "1,234,568"
   },
   {
    "value": 1234567.895,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "1234568"
   },
   {
    "value": 1234567.895,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "1.234.568"
   },
   {
    "value": 1234567.895,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "1234567.90"
   },
   {
    "value": 1234567.895,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "1,234,567.90"
   },
   {
    "value": 1234567.895,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "1234567,90"
   },
   {
    "value": 1234567.895,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "1.234.567,90"
   },
   {
    "value": 1234567.895,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "123456789.50%"
   },
   {
    "value": 1234567.895,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "123456789.50%"
   },
   {
    "value": 1234567.895,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "123456789,50%"
   },
   {
    "value": 1234567.895,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "123456789,50%"
   },
   {
    "value": 999.995,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$1000.00"
   },
   {
    "value": 999.995,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$1,000.00"
   },
   {
    "value": 999.995,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$1000,00"
   },
   {
    "value": 999.995,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$1.000,00"
   },
   {
    "value": 999.995,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "1000"
   },
   {
    "value": 999.995,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "1,000"
   },
   {
    "value": 999.995,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "1000"
   },
   {
    "value": 999.995,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "1.000"
   },
   {
    "value": 999.995,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "1000.00"
   },
   {
    "value": 999.995,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "1,000.00"
   },
   {
    "value": 999.995,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "1000,00"
   },
   {
    "value": 999.995,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "1.000,00"
   },
   {
    "value": 999.995,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "99999.50%"
   },
   {
    "value": 999.995,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "99999.50%"
   },
   {
    "value": 999.995,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "99999,50%"
   },
   {
    "value": 999.995,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "99999,50%"
   },
   {
    "value": -0.004,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-$0.00"
   },
   {
    "value": -0.004,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-$0.00"
   },
   {
    "value": -0.004,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-$0,00"
   },
   {
    "value": -0.004,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-$0,00"
   },
   {
    "value": -0.004,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": -0.004,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": -0.004,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": -0.004,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": -0.004,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-0.00"
   },
   {
    "value": -0.004,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-0.00"
   },
   {
    "value": -0.004,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-0,00"
   },
   {
    "value": -0.004,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-0,00"
   },
   {
    "value": -0.004,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-0.40%"
   },
   {
    "value": -0.004,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-0.40%"
   },
   {
    "value": -0.004,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-0,40%"
   },
   {
    "value": -0.004,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-0,40%"
   },
   {
    "value": 1e-10,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$0.00"
   },
   {
    "value": 1e-10,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$0.00"
   },
   {
    "value": 1e-10,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$0,00"
   },
   {
    "value": 1e-10,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$0,00"
   },
   {
    "value": 1e-10,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 1e-10,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 1e-10,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 1e-10,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 1e-10,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 1e-10,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 1e-10,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 1e-10,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 1e-10,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0.00%"
   },
   {
    "value": 1e-10,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0.00%"
   },
   {
    "value": 1e-10,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0,00%"
   },
   {
    "value": 1e-10,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0,00%"
   },
   {
    "value": 12.0,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$12.00"
   },
   {
    "value": 12.0,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$12.00"
   },
   {
    "value": 12.0,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$12,00"
   },
   {
    "value": 12.0,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$12,00"
   },
   {
    "value": 12.0,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "12"
   },
   {
    "value": 12.0,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "12"
   },
   {
    "value": 12.0,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "12"
   },
   {
    "value": 12.0,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "12"
   },
   {
    "value": 12.0,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "12"
   },
   {
    "value": 12.0,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "12"
   },
   {
    "value": 12.0,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "12"
   },
   {
    "value": 12.0,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "12"
   },
   {
    "value": 12.0,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "1200.00%"
   },
   {
    "value": 12.0,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "1200.00%"
   },
   {
    "value": 12.0,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "1200,00%"
   },
   {
    "value": 12.0,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "1200,00%"
   },
   {
    "value": 12.000000000001,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$12.00"
   },
   {
    "value": 12.000000000001,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$12.00"
   },
   {
    "value": 12.000000000001,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$12,00"
   },
   {
    "value": 12.000000000001,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$12,00"
   },
   {
    "value": 12.000000000001,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "12"
   },
   {
    "value": 12.000000000001,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "12"
   },
   {
    "value": 12.000000000001,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "12"
   },
   {
    "value": 12.000000000001,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "12"
   },
   {
    "value": 12.000000000001,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "12"
   },
   {
    "value": 12.000000000001,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "12"
   },
   {
    "value": 12.000000000001,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "12"
   },
   {
    "value": 12.000000000001,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "12"
   },
   {
    "value": 12.000000000001,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "1200.00%"
   },
   {
    "value": 12.000000000001,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "1200.00%"
   },
   {
    "value": 12.000000000001,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "1200,00%"
   },
   {
    "value": 12.000000000001,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "1200,00%"
   },
   {
    "value": 0.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$0.50"
   },
   {
    "value": 0.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$0.50"
   },
   {
    "value": 0.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$0,50"
   },
   {
    "value": 0.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$0,50"
   },
   {
    "value": 0.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0.50"
   },
   {
    "value": 0.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0.50"
   },
   {
    "value": 0.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0,50"
   },
   {
    "value": 0.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0,50"
   },
   {
    "value": 0.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "50.00%"
   },
   {
    "value": 0.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "50.00%"
   },
   {
    "value": 0.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "50,00%"
   },
   {
    "value": 0.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "50,00%"
   },
   {
    "value": -1.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-$1.50"
   },
   {
    "value": -1.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-$1.50"
   },
   {
    "value": -1.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-$1,50"
   },
   {
    "value": -1.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-$1,50"
   },
   {
    "value": -1.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-2"
   },
   {
    "value": -1.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-2"
   },
   {
    "value": -1.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-2"
   },
   {
    "value": -1.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-2"
   },
   {
    "value": -1.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-1.50"
   },
   {
    "value": -1.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-1.50"
   },
   {
    "value": -1.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-1,50"
   },
   {
    "value": -1.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-1,50"
   },
   {
    "value": -1.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "-150.00%"
   },
   {
    "value": -1.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "-150.00%"
   },
   {
    "value": -1.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "-150,00%"
   },
   {
    "value": -1.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "-150,00%"
   },
   {
    "value": 1000000000000000.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$1000000000000000.50"
   },
   {
    "value": 1000000000000000.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$1,000,000,000,000,000.50"
   },
   {
    "value": 1000000000000000.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$1000000000000000,50"
   },
   {
    "value": 1000000000000000.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$1.000.000.000.000.000,50"
   },
   {
    "value": 1000000000000000.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "1000000000000000"
   },
   {
    "value": 1000000000000000.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "1,000,000,000,000,000"
   },
   {
    "value": 1000000000000000.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "1000000000000000"
   },
   {
    "value": 1000000000000000.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "1.000.000.000.000.000"
   },
   {
    "value": 1000000000000000.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "1000000000000000.50"
   },
   {
    "value": 1000000000000000.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "1,000,000,000,000,000.50"
   },
   {
    "value": 1000000000000000.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "1000000000000000,50"
   },
   {
    "value": 1000000000000000.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "1.000.000.000.000.000,50"
   },
   {
    "value": 1000000000000000.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "100000000000000048.00%"
   },
   {
    "value": 1000000000000000.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "100000000000000048.00%"
   },
   {
    "value": 1000000000000000.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "100000000000000048,00%"
   },
   {
    "value": 1000000000000000.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "100000000000000048,00%"
   },
   {
    "value": 0.0625,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$0.06"
   },
   {
    "value": 0.0625,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$0.06"
   },
   {
    "value": 0.0625,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$0,06"
   },
   {
    "value": 0.0625,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$0,06"
   },
   {
    "value": 0.0625,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.0625,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.0625,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0"
   },
   {
    "value": 0.0625,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0"
   },
   {
    "value": 0.0625,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "0.06"
   },
   {
    "value": 0.0625,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "0.06"
   },
   {
    "value": 0.0625,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "0,06"
   },
   {
    "value": 0.0625,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "0,06"
   },
   {
    "value": 0.0625,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "6.25%"
   },
   {
    "value": 0.0625,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "6.25%"
   },
   {
    "value": 0.0625,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "6,25%"
   },
   {
    "value": 0.0625,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "6,25%"
   },
   {
    "value": 41.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "$41.50"
   },
   {
    "value": 41.5,
    "kind": "money",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "$41.50"
   },
   {
    "value": 41.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "$41,50"
   },
   {
    "value": 41.5,
    "kind": "money",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "$41,50"
   },
   {
    "value": 41.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "42"
   },
   {
    "value": 41.5,
    "kind": "int",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "42"
   },
   {
    "value": 41.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "42"
   },
   {
    "value": 41.5,
    "kind": "int",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "42"
   },
   {
    "value": 41.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "41.50"
   },
   {
    "value": 41.5,
    "kind": "num",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "41.50"
   },
   {
    "value": 41.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "41,50"
   },
   {
    "value": 41.5,
    "kind": "num",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "41,50"
   },
   {
    "value": 41.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": false,
    "out": "4150.00%"
   },
   {
    "value": 41.5,
    "kind": "pct",
-   "decSep": ".",
+   "decimalSeparator": ".",
    "thousands": true,
    "out": "4150.00%"
   },
   {
    "value": 41.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": false,
    "out": "4150,00%"
   },
   {
    "value": 41.5,
    "kind": "pct",
-   "decSep": ",",
+   "decimalSeparator": ",",
    "thousands": true,
    "out": "4150,00%"
   }

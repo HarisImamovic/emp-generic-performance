@@ -1,11 +1,3 @@
-"""Records what the desktop app's code produces for each file in tests/fixtures/.
-
-The website's tests (web/test/parity.test.ts) compare its own results with these
-files, so the two apps can't drift apart. CI regenerates them and fails if the
-committed copies are out of date.
-
-Run after changing desktop/generic_performance.py:  python tests/dump_python.py
-"""
 from __future__ import annotations
 
 import json
@@ -21,11 +13,10 @@ FIXTURES = ROOT / "tests" / "fixtures"
 EXPECTED = ROOT / "tests" / "expected"
 
 COPY_OPTIONS = [
-    {"decSep": ".", "withLabels": False, "withChange": False, "withHeader": False},
-    {"decSep": ",", "withLabels": True, "withChange": True, "withHeader": True},
+    {"decimalSeparator": ".", "withLabels": False, "withChange": False, "withHeader": False},
+    {"decimalSeparator": ",", "withLabels": True, "withChange": True, "withHeader": True},
 ]
 
-# Formatting edge cases: rounding ties, negatives, tiny and large values.
 FMT_VALUES = [None, 0.0, -0.0, 0.125, 0.375, 2.5, 3.5, -2.5, 0.005, 1.005, 1234567.895, 999.995,
               -0.004, 1e-10, 12.0, 12.000000000001, 0.5, -1.5, 1e15 + 0.5, 0.0625, 41.5]
 KINDS = ["money", "int", "num", "pct"]
@@ -53,7 +44,6 @@ def dump(path: Path) -> dict:
         "segments": {},
         "copy": [],
     }
-    # Leave out every other campaign too, to check partial selections.
     excluded = {i for i in range(len(rep.rows)) if i % 2 == 1}
     blocks_all, blocks_some = [], []
     for seg in gp.SEGMENTS:
@@ -64,7 +54,7 @@ def dump(path: Path) -> dict:
         blocks_all.append((seg.short, res_all))
         blocks_some.append((seg.short, res_some))
     for o in COPY_OPTIONS:
-        args = (o["decSep"], o["withLabels"], o["withChange"], o["withHeader"])
+        args = (o["decimalSeparator"], o["withLabels"], o["withChange"], o["withHeader"])
         out["copy"].append({
             "options": o,
             "segment": gp.build_clipboard_text(blocks_all[0][1], *args),
@@ -80,7 +70,7 @@ def basics() -> dict:
         for kind in KINDS:
             for dec in (".", ","):
                 for th in (False, True):
-                    fmt.append({"value": v, "kind": kind, "decSep": dec, "thousands": th,
+                    fmt.append({"value": v, "kind": kind, "decimalSeparator": dec, "thousands": th,
                                 "out": gp.fmt_value(v, kind, dec, th)})
     return {
         "fmt": fmt,

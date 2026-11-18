@@ -1,127 +1,135 @@
-// Clipboard text and Excel export.
-// Port of build_clipboard_text / build_all_segments_text / export_xlsx in desktop/generic_performance.py.
-import { fmtValue } from "./numbers";
-import { type Report, type ResultRow, type Segment } from "./report";
+import { type Kind, formatValue } from "./numbers";
+import type { Report, ResultRow, Segment } from "./report";
 
 export type Layout = "side" | "stacked";
 
 export interface CopyOptions {
-  decSep: string;
+  decimalSeparator: string;
   withLabels: boolean;
   withChange: boolean;
   withHeader: boolean;
 }
 
-function valueCells(r: ResultRow, decSep: string, withChange: boolean): string[] {
+const TAB = "\t";
+const NEWLINE = "\n";
+const PERIOD_HEADERS = ["Current", "Compared"];
+const CHANGE_HEADER = "Change %";
+const EXCEL_FORMATS: Record<Kind, string> = { money: "#,##0.00", int: "#,##0", num: "#,##0.##", pct: "0.00%" };
+const CHANGE_FORMAT = "0.00%";
+const SUMMARY_COLUMN_WIDTH = 15;
+const LABEL_COLUMN_MIN_WIDTH = 20;
+const LABEL_COLUMN_MAX_WIDTH = 60;
+const COLUMNS_PER_SEGMENT = 3;
+
+function valueHeaders(options: CopyOptions): string[] {
+  return options.withChange ? [...PERIOD_HEADERS, CHANGE_HEADER] : PERIOD_HEADERS;
+}
+
+function valueCells(row: ResultRow, options: CopyOptions): string[] {
+  const thousands = row.kind === "money";
   const cells = [
-    fmtValue(r.cur, r.kind, decSep, r.kind === "money"),
-    fmtValue(r.prev, r.kind, decSep, r.kind === "money"),
+    formatValue(row.cur, row.kind, options.decimalSeparator, thousands),
+    formatValue(row.prev, row.kind, options.decimalSeparator, thousands),
   ];
-  if (withChange) cells.push(fmtValue(r.change, "pct", decSep));
+  if (options.withChange) cells.push(formatValue(row.change, "pct", options.decimalSeparator));
   return cells;
 }
 
-export function buildClipboardText(results: ResultRow[], o: CopyOptions): string {
-  const lines: string[] = [];
-  if (o.withHeader) {
-    const cols = [...(o.withLabels ? ["Metric"] : []), "Current", "Compared", ...(o.withChange ? ["Change %"] : [])];
-    lines.push(cols.join("\t"));
-  }
-  for (const r of results) {
-    lines.push([...(o.withLabels ? [r.label] : []), ...valueCells(r, o.decSep, o.withChange)].join("\t"));
-  }
-  return lines.join("\n");
+function labelCell(text: string, options: CopyOptions): string[] {
+  return options.withLabels ? [text] : [];
 }
 
-export function buildAllSegmentsText(blocks: [string, ResultRow[]][], o: CopyOptions, layout: Layout): string {
-  if (layout === "stacked") {
-    return blocks
-      .map(([name, results]) => {
-        const text = buildClipboardText(results, o);
-        return o.withHeader ? `${name}\n${text}` : text;
-      })
-      .join("\n\n");
-  }
-  const cols = ["Current", "Compared", ...(o.withChange ? ["Change %"] : [])];
-  const lines: string[] = [];
-  if (o.withHeader) {
-    lines.push(
-      [...(o.withLabels ? ["Metric"] : []), ...blocks.flatMap(([name]) => cols.map((c) => `${name} - ${c}`))].join(
-        "\t",
-      ),
-    );
-  }
-  blocks[0][1].forEach((first, k) => {
-    const cells = o.withLabels ? [first.label] : [];
-    for (const [, results] of blocks) cells.push(...valueCells(results[k], o.decSep, o.withChange));
-    lines.push(cells.join("\t"));
-  });
-  return lines.join("\n");
+export function buildClipboardText(results: ResultRow[], options: CopyOptions): string {
+  const lines = results.map((row) => [...labelCell(row.label, options), ...valueCells(row, options)].join(TAB));
+  if (options.withHeader) lines.unshift([...labelCell("Metric", options), ...valueHeaders(options)].join(TAB));
+  return lines.join(NEWLINE);
 }
 
-const XL_FORMATS = { money: "#,##0.00", int: "#,##0", num: "#,##0.##", pct: "0.00%" } as const;
+function stackedText(blocks: [string, ResultRow[]][], options: CopyOptions): string {
+  return blocks
+    .map(([name, results]) => {
+      const table = buildClipboardText(results, options);
+      return options.withHeader ? `${name}${NEWLINE}${table}` : table;
+    })
+    .join(NEWLINE + NEWLINE);
+}
 
-/** The Summary + Campaigns workbook, as .xlsx bytes. */
+function sideBySideText(blocks: [string, ResultRow[]][], options: CopyOptions): string {
+  const lines = blocks[0][1].map((first, index) =>
+    [...labelCell(first.label, options), ...blocks.flatMap(([, results]) => valueCells(results[index], options))].join(
+      TAB,
+    ),
+  );
+  if (options.withHeader) {
+    const headers = blocks.flatMap(([name]) => valueHeaders(options).map((h) => `${name} - ${h}`));
+    lines.unshift([...labelCell("Metric", options), ...headers].join(TAB));
+  }
+  return lines.join(NEWLINE);
+}
+
+export function buildAllSegmentsText(blocks: [string, ResultRow[]][], options: CopyOptions, layout: Layout): string {
+  return layout === "stacked" ? stackedText(blocks, options) : sideBySideText(blocks, options);
+}
+
 export async function exportXlsx(
   report: Report,
   blocks: [Segment, ResultRow[]][],
-  excluded: Set<number>,
+  excluded: ReadonlySet<number>,
 ): Promise<ArrayBuffer> {
-  const ExcelJS = (await import("exceljs")).default;
-  const wb = new ExcelJS.Workbook();
-  const ws = wb.addWorksheet("Summary", { views: [{ state: "frozen", xSplit: 1, ySplit: 2 }] });
+  const { default: ExcelJS } = await import("exceljs");
+  const workbook = new ExcelJS.Workbook();
   const bold = { bold: true };
 
-  const head = ws.getCell(2, 1);
-  head.value = "Metric";
-  head.font = bold;
-  blocks.forEach(([seg], s) => {
-    const c0 = 2 + s * 3;
-    const top = ws.getCell(1, c0);
-    top.value = seg.label;
-    top.font = bold;
-    top.alignment = { horizontal: "center" };
-    ws.mergeCells(1, c0, 1, c0 + 2);
-    ["Current", "Compared", "Change %"].forEach((text, o) => {
-      const c = ws.getCell(2, c0 + o);
-      c.value = text;
-      c.font = bold;
-      ws.getColumn(c0 + o).width = 15;
+  const summary = workbook.addWorksheet("Summary", { views: [{ state: "frozen", xSplit: 1, ySplit: 2 }] });
+  Object.assign(summary.getCell(2, 1), { value: "Metric", font: bold });
+
+  blocks.forEach(([segment, results], blockIndex) => {
+    const firstColumn = 2 + blockIndex * COLUMNS_PER_SEGMENT;
+    Object.assign(summary.getCell(1, firstColumn), {
+      value: segment.label,
+      font: bold,
+      alignment: { horizontal: "center" },
     });
-  });
-  report.metrics.forEach((m, k) => {
-    const row = 3 + k;
-    ws.getCell(row, 1).value = m.label;
-    blocks.forEach(([, results], s) => {
-      const r = results[k];
-      const c0 = 2 + s * 3;
+    summary.mergeCells(1, firstColumn, 1, firstColumn + COLUMNS_PER_SEGMENT - 1);
+
+    [...PERIOD_HEADERS, CHANGE_HEADER].forEach((text, offset) => {
+      Object.assign(summary.getCell(2, firstColumn + offset), { value: text, font: bold });
+      summary.getColumn(firstColumn + offset).width = SUMMARY_COLUMN_WIDTH;
+    });
+
+    results.forEach((row, metricIndex) => {
       const cells: [number | null, string][] = [
-        [r.cur, XL_FORMATS[r.kind]],
-        [r.prev, XL_FORMATS[r.kind]],
-        [r.change, "0.00%"],
+        [row.cur, EXCEL_FORMATS[row.kind]],
+        [row.prev, EXCEL_FORMATS[row.kind]],
+        [row.change, CHANGE_FORMAT],
       ];
-      cells.forEach(([v, f], o) => {
-        const c = ws.getCell(row, c0 + o);
-        c.value = v;
-        c.numFmt = f;
+      cells.forEach(([value, numFmt], offset) => {
+        Object.assign(summary.getCell(3 + metricIndex, firstColumn + offset), { value, numFmt });
       });
     });
   });
-  const longest = report.metrics.length ? Math.max(...report.metrics.map((m) => m.label.length)) : 20;
-  ws.getColumn(1).width = Math.max(20, Math.min(60, longest + 2));
 
-  const info = wb.addWorksheet("Campaigns");
-  info.addRow(["Source file", report.fileName]);
-  if (report.skipped.length) info.addRow(["Columns skipped", report.skipped.join(", ")]);
-  info.addRow([]);
-  info.addRow(["Campaign", "Segment", "Included"]).font = bold;
-  report.rows.forEach((r, i) => {
-    if (r.segment) info.addRow([r.name, r.segment.label, excluded.has(i) ? "No" : "Yes"]);
+  report.metrics.forEach((metric, index) => {
+    summary.getCell(3 + index, 1).value = metric.label;
   });
-  report.rows.forEach((r) => {
-    if (!r.segment) info.addRow([r.name, "(not in Generic)"]);
+  const longestLabel = report.metrics.length
+    ? Math.max(...report.metrics.map((m) => m.label.length))
+    : LABEL_COLUMN_MIN_WIDTH;
+  summary.getColumn(1).width = Math.max(LABEL_COLUMN_MIN_WIDTH, Math.min(LABEL_COLUMN_MAX_WIDTH, longestLabel + 2));
+
+  const campaigns = workbook.addWorksheet("Campaigns");
+  campaigns.addRow(["Source file", report.fileName]);
+  if (report.skipped.length) campaigns.addRow(["Columns skipped", report.skipped.join(", ")]);
+  campaigns.addRow([]);
+  campaigns.addRow(["Campaign", "Segment", "Included"]).font = bold;
+  report.rows.forEach((row, index) => {
+    if (row.segment) campaigns.addRow([row.name, row.segment.label, excluded.has(index) ? "No" : "Yes"]);
   });
-  info.getColumn(1).width = 60;
-  info.getColumn(2).width = 42;
-  return (await wb.xlsx.writeBuffer()) as ArrayBuffer;
+  report.rows.forEach((row) => {
+    if (!row.segment) campaigns.addRow([row.name, "(not in Generic)"]);
+  });
+  campaigns.getColumn(1).width = 60;
+  campaigns.getColumn(2).width = 42;
+
+  return (await workbook.xlsx.writeBuffer()) as ArrayBuffer;
 }

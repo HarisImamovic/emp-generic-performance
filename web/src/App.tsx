@@ -1,460 +1,204 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fmtValue } from "./core/numbers";
-import { type CopyOptions, type Layout, buildAllSegmentsText, buildClipboardText, exportXlsx } from "./core/output";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { CampaignList } from "./components/CampaignList";
+import { CopyOptionsPanel } from "./components/CopyOptionsPanel";
+import { Header } from "./components/Header";
+import { ResultsTable } from "./components/ResultsTable";
+import { SegmentTabs } from "./components/SegmentTabs";
+import { SkippedColumnsNote } from "./components/SkippedColumnsNote";
+import { Toasts } from "./components/Toasts";
+import { buildAllSegmentsText, buildClipboardText, exportXlsx } from "./core/output";
 import { loadReport } from "./core/read";
+import { POST_L, type Report, type ResultRow, SEGMENTS, type Segment, aggregate, segmentRows } from "./core/report";
+import { useFileDrop } from "./hooks/useFileDrop";
+import { useShortcuts } from "./hooks/useShortcuts";
+import { type ToastMessage, useToasts } from "./hooks/useToasts";
 import {
-  GENERIC,
-  POST_L,
-  type Report,
-  type ResultRow,
-  SEGMENTS,
-  type Segment,
-  aggregate,
-  missingCompared,
-  segmentRows,
-} from "./core/report";
+  COPY_BLOCKED,
+  EXPORT_FAILED,
+  FIRST_FILE_ONLY,
+  NOTHING_INCLUDED,
+  copiedMessage,
+  exportedMessage,
+  loadErrorMessage,
+  loadMessages,
+} from "./messages";
+import { useSettings } from "./settings";
 
-// ---- settings (this browser only) ------------------------------------------------
+const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-interface Settings extends CopyOptions {
-  layout: Layout;
-  segment: string;
-}
-
-const SETTINGS_KEY = "generic-performance-settings";
-
-function systemDecimalSeparator(): string {
-  try {
-    return (1.5).toLocaleString().includes(",") ? "," : ".";
-  } catch {
-    return ".";
-  }
-}
-
-function loadSettings(): Settings {
-  const defaults: Settings = {
-    decSep: systemDecimalSeparator(),
-    withLabels: false,
-    withChange: false,
-    withHeader: false,
-    layout: "side",
-    segment: POST_L.key,
-  };
-  try {
-    return { ...defaults, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}") };
-  } catch {
-    return defaults;
-  }
-}
-
-function saveSettings(s: Settings) {
-  try {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
-  } catch {
-    // private mode or storage blocked: settings just aren't remembered
-  }
-}
-
-// ---- helpers ------------------------------------------------------------------------
-
-type Level = "info" | "ok" | "warn" | "error";
-const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-const MOD = IS_MAC ? "⌘" : "Ctrl+";
-// Cloudflare Access handles sign-in in front of the site; this ends that session.
-// Hidden on the local dev server, where there is no sign-in.
-const LOGOUT_URL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) ? null : "/cdn-cgi/access/logout";
-
-function downloadBytes(bytes: ArrayBuffer, fileName: string) {
-  const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+function downloadFile(bytes: ArrayBuffer, fileName: string): void {
+  const url = URL.createObjectURL(new Blob([bytes], { type: XLSX_MIME }));
+  const link = Object.assign(document.createElement("a"), { href: url, download: fileName });
+  document.body.append(link);
+  link.click();
+  link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function ChangeBadge({ value, decSep }: { value: number | null; decSep: string }) {
-  if (value === null) return <span className="chg">–</span>;
-  if (value === 0) return <span className="chg">{fmtValue(value, "pct", decSep)}</span>;
-  return value > 0 ? (
-    <span className="chg up"><span className="chg-arrow">▲ </span>+{fmtValue(value, "pct", decSep)}</span>
-  ) : (
-    <span className="chg down"><span className="chg-arrow">▼ </span>{fmtValue(value, "pct", decSep)}</span>
-  );
+function summarizeFile(report: Report | null): string {
+  if (!report) return "No file loaded";
+  const outsideGeneric = report.rows.filter((row) => !row.segment).length;
+  return [
+    report.fileName,
+    report.sheet && `sheet ${report.sheet}`,
+    `${report.rows.length} rows`,
+    `${report.metrics.length} metrics`,
+    `${outsideGeneric} rows outside Generic`,
+  ]
+    .filter(Boolean)
+    .join("  ·  ");
 }
 
-// ---- app --------------------------------------------------------------------------------
+function withoutExtension(fileName: string): string {
+  return fileName.replace(/\.[^.]+$/, "");
+}
 
 export default function App() {
-  const [settings, setSettings] = useState<Settings>(loadSettings);
+  const [settings, updateSettings] = useSettings();
   const [report, setReport] = useState<Report | null>(null);
-  const [excluded, setExcluded] = useState<Set<number>>(new Set());
-  const [seg, setSeg] = useState<Segment>(() => SEGMENTS.find((s) => s.key === settings.segment) ?? POST_L);
-  const [status, setStatus] = useState<{ msg: string; level: Level }>({
-    msg: "Ready. Files are read on this device only — nothing is uploaded.",
-    level: "info",
-  });
-  const [busy, setBusy] = useState(false);
-  const [dragging, setDragging] = useState(false);
+  const [excluded, setExcluded] = useState<ReadonlySet<number>>(new Set());
+  const [segment, setSegment] = useState<Segment>(() => SEGMENTS.find((s) => s.key === settings.segment) ?? POST_L);
+  const [isReading, setIsReading] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const { toasts, notify, dismiss } = useToasts();
 
-  const update = (patch: Partial<Settings>) =>
-    setSettings((s) => {
-      const next = { ...s, ...patch };
-      saveSettings(next);
-      return next;
-    });
+  const notifyAll = useCallback((messages: ToastMessage[]) => messages.forEach(notify), [notify]);
 
-  const selectSegment = useCallback((s: Segment) => {
-    setSeg(s);
-    setSettings((cur) => {
-      const next = { ...cur, segment: s.key };
-      saveSettings(next);
-      return next;
-    });
-  }, []);
+  const selectSegment = useCallback(
+    (next: Segment) => {
+      setSegment(next);
+      updateSettings({ segment: next.key });
+    },
+    [updateSettings],
+  );
 
-  const openFile = useCallback(async (file: File) => {
-    setBusy(true);
-    setStatus({ msg: `Reading ${file.name}…`, level: "info" });
-    try {
-      const rep = await loadReport(file.name, await file.arrayBuffer());
-      setReport(rep);
-      setExcluded(new Set());
-      const msg: string[] = [];
-      if (rep.campaignCol === null) msg.push("No 'Campaign' column found - campaigns cannot be segmented.");
-      const missing = missingCompared(rep);
-      if (missing.length) msg.push(`No compared column for: ${missing.join(", ")}.`);
-      if (rep.skipped.length) msg.push(`Skipped: ${rep.skipped.join(", ")}.`);
-      setStatus(
-        msg.length
-          ? { msg: msg.join("  "), level: "warn" }
-          : { msg: `Loaded ${file.name} - ${rep.metrics.length} metric columns.`, level: "ok" },
-      );
-    } catch (e) {
-      setStatus({ msg: `Could not read file: ${e instanceof Error ? e.message : String(e)}`, level: "error" });
-    } finally {
-      setBusy(false);
-    }
-  }, []);
+  const openFile = useCallback(
+    async (file: File) => {
+      setIsReading(true);
+      try {
+        const loaded = await loadReport(file.name, await file.arrayBuffer());
+        setReport(loaded);
+        setExcluded(new Set());
+        notifyAll(loadMessages(loaded));
+      } catch (error) {
+        notify(loadErrorMessage(error));
+      } finally {
+        setIsReading(false);
+      }
+    },
+    [notify, notifyAll],
+  );
 
-  // ---- derived data ----
-  const included = useCallback(
-    (s: Segment) => (report ? segmentRows(report, s).filter((i) => !excluded.has(i)) : []),
+  const openDroppedFiles = useCallback(
+    (files: File[]) => {
+      if (files.length > 1) notify(FIRST_FILE_ONLY);
+      void openFile(files[0]);
+    },
+    [notify, openFile],
+  );
+
+  const chooseFile = useCallback(() => fileInput.current?.click(), []);
+  const selectSegmentByIndex = useCallback((index: number) => selectSegment(SEGMENTS[index]), [selectSegment]);
+
+  const isDragging = useFileDrop(openDroppedFiles);
+  useShortcuts({ onOpen: chooseFile, onSegmentKey: selectSegmentByIndex });
+
+  const includedRows = useCallback(
+    (target: Segment) => (report ? segmentRows(report, target).filter((index) => !excluded.has(index)) : []),
     [report, excluded],
   );
-  const visible = useMemo(() => (report ? segmentRows(report, seg) : []), [report, seg]);
-  const results = useMemo(() => (report ? aggregate(report, included(seg)) : []), [report, seg, included]);
-  const allBlocks = (): [Segment, ResultRow[]][] => SEGMENTS.map((s) => [s, aggregate(report!, included(s))]);
+  const visibleRows = useMemo(() => (report ? segmentRows(report, segment) : []), [report, segment]);
+  const results = useMemo(
+    () => (report ? aggregate(report, includedRows(segment)) : []),
+    [report, segment, includedRows],
+  );
 
-  // ---- actions ----
-  const toClipboard = async (text: string, what: string) => {
+  const allSegmentResults = (loaded: Report): [Segment, ResultRow[]][] =>
+    SEGMENTS.map((s) => [s, aggregate(loaded, includedRows(s))]);
+
+  const copyText = async (text: string, what: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setStatus({ msg: `Copied ${what} to clipboard - paste into Excel with ${MOD}V.`, level: "ok" });
+      notify(copiedMessage(what));
     } catch {
-      setStatus({ msg: "The browser blocked clipboard access. Allow it for this site and try again.", level: "error" });
+      notify(COPY_BLOCKED);
     }
   };
 
   const copySegment = () => {
-    if (!report || !included(seg).length) {
-      setStatus({ msg: "Nothing to copy - load a file and include some campaigns.", level: "warn" });
+    if (!report) return;
+    if (!includedRows(segment).length) {
+      notify(NOTHING_INCLUDED);
       return;
     }
-    void toClipboard(buildClipboardText(results, settings), seg.short);
+    void copyText(buildClipboardText(results, settings), segment.short);
   };
 
-  const copyAll = () => {
-    if (!report) {
-      setStatus({ msg: "Nothing to copy - load a file first.", level: "warn" });
-      return;
+  const copyAllSegments = () => {
+    if (!report) return;
+    const blocks = allSegmentResults(report).map(([s, rows]): [string, ResultRow[]] => [s.short, rows]);
+    void copyText(buildAllSegmentsText(blocks, settings, settings.layout), "all segments");
+  };
+
+  const exportToExcel = async () => {
+    if (!report) return;
+    const fileName = `${withoutExtension(report.fileName)}_summary.xlsx`;
+    try {
+      downloadFile(await exportXlsx(report, allSegmentResults(report), excluded), fileName);
+      notify(exportedMessage(fileName));
+    } catch {
+      notify(EXPORT_FAILED);
     }
-    const blocks = allBlocks().map(([s, r]) => [s.short, r] as [string, ResultRow[]]);
-    void toClipboard(buildAllSegmentsText(blocks, settings, settings.layout), "all segments");
   };
 
-  const exportFile = async () => {
-    if (!report) {
-      setStatus({ msg: "Nothing to export - load a file first.", level: "warn" });
-      return;
-    }
-    const stem = report.fileName.replace(/\.[^.]+$/, "");
-    const bytes = await exportXlsx(report, allBlocks(), excluded);
-    downloadBytes(bytes, `${stem}_summary.xlsx`);
-    setStatus({ msg: `Downloaded ${stem}_summary.xlsx`, level: "ok" });
-  };
-
-  const toggle = (i: number) =>
-    setExcluded((prev) => {
-      const next = new Set(prev);
-      if (next.has(i)) next.delete(i);
-      else next.add(i);
+  const toggleRow = (index: number) =>
+    setExcluded((current) => {
+      const next = new Set(current);
+      if (!next.delete(index)) next.add(index);
       return next;
     });
 
-  const setAll = (on: boolean) =>
-    setExcluded((prev) => {
-      const next = new Set(prev);
-      for (const i of visible) {
-        if (on) next.delete(i);
-        else next.add(i);
-      }
+  const setAllVisible = (include: boolean) =>
+    setExcluded((current) => {
+      const next = new Set(current);
+      visibleRows.forEach((index) => (include ? next.delete(index) : next.add(index)));
       return next;
     });
-
-  // ---- keyboard: Ctrl/⌘+O to open, 1–4 to switch segment ----
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const typing = e.target instanceof HTMLElement && e.target.closest("input, select, textarea");
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "o") {
-        e.preventDefault();
-        fileInput.current?.click();
-      } else if (!typing && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-4]$/.test(e.key)) {
-        selectSegment(SEGMENTS[Number(e.key) - 1]);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [selectSegment]);
-
-  // ---- drag and drop anywhere on the page ----
-  useEffect(() => {
-    let depth = 0;
-    const hasFiles = (e: DragEvent) => !!e.dataTransfer?.types.includes("Files");
-    const enter = (e: DragEvent) => {
-      if (!hasFiles(e)) return;
-      e.preventDefault();
-      depth++;
-      setDragging(true);
-    };
-    const over = (e: DragEvent) => {
-      if (hasFiles(e)) e.preventDefault();
-    };
-    const leave = () => {
-      depth = Math.max(0, depth - 1);
-      if (!depth) setDragging(false);
-    };
-    const drop = (e: DragEvent) => {
-      if (!hasFiles(e)) return;
-      e.preventDefault();
-      depth = 0;
-      setDragging(false);
-      const f = e.dataTransfer?.files[0];
-      if (f) void openFile(f);
-    };
-    window.addEventListener("dragenter", enter);
-    window.addEventListener("dragover", over);
-    window.addEventListener("dragleave", leave);
-    window.addEventListener("drop", drop);
-    return () => {
-      window.removeEventListener("dragenter", enter);
-      window.removeEventListener("dragover", over);
-      window.removeEventListener("dragleave", leave);
-      window.removeEventListener("drop", drop);
-    };
-  }, [openFile]);
-
-  // ---- render ----
-  const outside = report ? report.rows.filter((r) => !r.segment).length : 0;
-  const fileInfo = report
-    ? [
-        report.fileName,
-        report.sheet ? `sheet ${report.sheet}` : null,
-        `${report.rows.length} rows`,
-        `${report.metrics.length} metrics`,
-        `${outside} rows outside Generic`,
-      ]
-        .filter(Boolean)
-        .join("  ·  ")
-    : "No file loaded";
 
   return (
     <div className="app">
-      <header className="topbar">
-        <div className="topbar-text">
-          <h1>Generic Performance</h1>
-          <p className="file-info">{fileInfo}</p>
-        </div>
-        <button className="btn accent" onClick={() => fileInput.current?.click()} disabled={busy}>
-          {busy ? "Reading…" : "Open export…"}
-          <kbd>{MOD}O</kbd>
-        </button>
-        {LOGOUT_URL && (
-          <a className="btn ghost" href={LOGOUT_URL}>
-            Sign out
-          </a>
-        )}
-        <input
-          ref={fileInput}
-          type="file"
-          accept=".xlsx,.xlsm,.csv,.tsv,.txt"
-          hidden
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            e.target.value = "";
-            if (f) void openFile(f);
-          }}
-        />
-      </header>
+      <Header
+        ref={fileInput}
+        fileSummary={summarizeFile(report)}
+        isReading={isReading}
+        onChooseFile={chooseFile}
+        onFileChosen={(file) => void openFile(file)}
+      />
 
-      <nav className="tabs" aria-label="Segments">
-        {SEGMENTS.map((s, n) => {
-          const rows = report ? segmentRows(report, s) : [];
-          const inc = rows.filter((i) => !excluded.has(i)).length;
-          return (
-            <button
-              key={s.key}
-              className={`tab${s === seg ? " active" : ""}`}
-              onClick={() => selectSegment(s)}
-              title={`${s.label} (key ${n + 1})`}
-              aria-pressed={s === seg}
-            >
-              {s.short}
-              {report && <span className="tab-count">{inc === rows.length ? inc : `${inc}/${rows.length}`}</span>}
-            </button>
-          );
-        })}
-        <span className="hint">Keys 1–4 switch</span>
-      </nav>
+      <SegmentTabs report={report} active={segment} excluded={excluded} onSelect={selectSegment} />
 
       <main className="body">
-        <section className="card campaigns">
-          <div className="card-head">
-            <h2>Campaigns</h2>
-            {report && (
-              <span className="muted small">
-                {included(seg).length} of {visible.length} included
-              </span>
-            )}
-          </div>
-          <div className="list-bar">
-            <span className="muted small">Tick to include</span>
-            <span>
-              <button className="link" onClick={() => setAll(true)} disabled={!report}>
-                All
-              </button>
-              <button className="link" onClick={() => setAll(false)} disabled={!report}>
-                None
-              </button>
-            </span>
-          </div>
-          <ul className="campaign-list">
-            {visible.map((i) => {
-              const r = report!.rows[i];
-              return (
-                <li key={i}>
-                  <label className={excluded.has(i) ? "off" : ""}>
-                    <input type="checkbox" checked={!excluded.has(i)} onChange={() => toggle(i)} />
-                    <span className="name">{r.name}</span>
-                    {seg === GENERIC && r.segment && <span className="seg-tag">{r.segment.short}</span>}
-                  </label>
-                </li>
-              );
-            })}
-            {report && !visible.length && <li className="muted small empty-list">No campaigns in this segment.</li>}
-          </ul>
-          <p className="muted small">Leaving a campaign out here also removes it from Generic overall.</p>
-        </section>
+        <CampaignList
+          report={report}
+          segment={segment}
+          rowIndices={visibleRows}
+          excluded={excluded}
+          onToggle={toggleRow}
+          onSetAll={setAllVisible}
+        />
 
         <section className="card summary">
           <div className="card-head">
-            <h2>{seg.label}</h2>
+            <h2>{segment.label}</h2>
           </div>
-          <div className="table-wrap">
-            {report ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th className="left">Metric</th>
-                    <th>Current</th>
-                    <th>Compared</th>
-                    <th>Change</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map((r, k) => (
-                    <tr key={k}>
-                      <td className="left">
-                        {r.label}
-                        {report.metrics[k].derived && (
-                          <span className="derived" title="Recalculated from the summed columns">
-                            {" "}
-                            ƒ
-                          </span>
-                        )}
-                      </td>
-                      <td className="cur">{fmtValue(r.cur, r.kind, settings.decSep, true) || "–"}</td>
-                      <td className="prev">{fmtValue(r.prev, r.kind, settings.decSep, true) || "–"}</td>
-                      <td>
-                        <ChangeBadge value={r.change} decSep={settings.decSep} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="empty">
-                <p>No data yet</p>
-                <p className="muted">
-                  Open an SA360 export ({MOD}O) or drop the file anywhere on this page.
-                  <br />
-                  It's read on this device only and never uploaded.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="options">
-            <span className="muted small options-title">Copy options</span>
-            <label>
-              Decimal
-              <select value={settings.decSep} onChange={(e) => update({ decSep: e.target.value })}>
-                <option value=".">.</option>
-                <option value=",">,</option>
-              </select>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={settings.withLabels}
-                onChange={(e) => update({ withLabels: e.target.checked })}
-              />
-              Metric names
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={settings.withChange}
-                onChange={(e) => update({ withChange: e.target.checked })}
-              />
-              Change %
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={settings.withHeader}
-                onChange={(e) => update({ withHeader: e.target.checked })}
-              />
-              Header
-            </label>
-            <label>
-              All segments
-              <select value={settings.layout} onChange={(e) => update({ layout: e.target.value as Layout })}>
-                <option value="side">Side by side</option>
-                <option value="stacked">Stacked</option>
-              </select>
-            </label>
-          </div>
-
+          <ResultsTable report={report} results={results} decimalSeparator={settings.decimalSeparator} />
+          {report && <SkippedColumnsNote skipped={report.skipped} />}
+          <CopyOptionsPanel settings={settings} onChange={updateSettings} />
           <div className="actions">
-            <button className="btn" onClick={() => void exportFile()} disabled={!report}>
+            <button className="btn" onClick={() => void exportToExcel()} disabled={!report}>
               Export to Excel
             </button>
-            <button className="btn" onClick={copyAll} disabled={!report}>
+            <button className="btn" onClick={copyAllSegments} disabled={!report}>
               Copy all segments
             </button>
             <button className="btn accent" onClick={copySegment} disabled={!report}>
@@ -464,12 +208,9 @@ export default function App() {
         </section>
       </main>
 
-      <footer className={`status ${status.level}`} role="status">
-        <span className="dot">●</span>
-        <span>{status.msg}</span>
-      </footer>
+      <Toasts toasts={toasts} onDismiss={dismiss} />
 
-      {dragging && (
+      {isDragging && (
         <div className="drop-overlay">
           <p>Drop the SA360 export to open it</p>
         </div>
