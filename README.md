@@ -2,19 +2,6 @@
 
 Small Windows desktop tool. It turns a Google Search Ads 360 campaign export into current-period vs. compared-period tables for the Generic Search segments, ready to paste into Excel.
 
-## Segments
-
-Campaigns are sorted by name, using the same rules as the SA360 CASE formula (case-insensitive):
-
-| Segment | Rule |
-|---|---|
-| **Post-L** (BAU \| Post-L \| Generic Search) | contains `searchnb` and `post` |
-| **Pre-L Vertical** (BAU \| Pre-L \| Generic Search \| Vertical) | contains `searchnb`, no `dma`, no `post` |
-| **Pre-L Campus** (BAU \| Pre-L \| Generic Search \| Campus) | contains `searchnb` and `dma`, no `post` |
-| **Generic overall** | all three above combined |
-
-Each rule excludes campaigns that contain `aurora`, `ssm`, `cindma`, `slcdma` or `nsh`. Campaigns that match no rule are left out. They are still counted in the header and listed in the Excel export.
-
 ## Metrics
 
 Every numeric column in the export becomes a metric, in file order. Each one is paired with its `(Compared to)` column.
