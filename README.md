@@ -2,19 +2,6 @@
 
 Small Windows desktop tool. It turns a Google Search Ads 360 campaign export into current-period vs. compared-period tables for the Generic Search segments, ready to paste into Excel.
 
-## Segments
-
-Campaigns are sorted by name, using the same rules as the SA360 CASE formula (case-insensitive):
-
-| Segment | Rule |
-|---|---|
-| **Post-L** (BAU \| Post-L \| Generic Search) | contains `searchnb` and `post` |
-| **Pre-L Vertical** (BAU \| Pre-L \| Generic Search \| Vertical) | contains `searchnb`, no `dma`, no `post` |
-| **Pre-L Campus** (BAU \| Pre-L \| Generic Search \| Campus) | contains `searchnb` and `dma`, no `post` |
-| **Generic overall** | all three above combined |
-
-Each rule excludes campaigns that contain `aurora`, `ssm`, `cindma`, `slcdma` or `nsh`. Campaigns that match no rule are left out. They are still counted in the header and listed in the Excel export.
-
 ## Metrics
 
 Every numeric column in the export becomes a metric, in file order. Each one is paired with its `(Compared to)` column.
@@ -45,3 +32,12 @@ python generic_performance.py
 ```
 
 To build `dist\Generic-Performance.exe`, double-click `build_exe.bat`. It creates a local `.venv` and runs PyInstaller.
+
+## Download the exe (no Python needed)
+
+The exe bundles Python and every dependency, so users only need Windows. Download `Generic-Performance.exe` from the repo's **Releases** page and run it. The exe is unsigned, so on first run Windows may show "Windows protected your PC": click **More info → Run anyway**.
+
+GitHub builds the exe automatically (`.github/workflows/build-exe.yml`):
+
+- **New release:** push a version tag, e.g. `git tag v1.0.0 && git push origin v1.0.0`. The exe is attached to a new release with that name.
+- **Test build without a release:** Actions tab → **Build exe** → **Run workflow**. The exe appears under the run's **Artifacts**.
