@@ -1,9 +1,9 @@
 import { formatValue } from "../core/numbers";
-import type { Report, ResultRow } from "../core/report";
+import type { ResultRow } from "../core/report";
 import { IS_TOUCH_DEVICE, SHORTCUT_PREFIX } from "../platform";
 
 interface ResultsTableProps {
-  report: Report | null;
+  hasReport: boolean;
   results: ResultRow[];
   decimalSeparator: string;
 }
@@ -37,11 +37,22 @@ function EmptyState() {
   );
 }
 
-export function ResultsTable({ report, results, decimalSeparator }: ResultsTableProps) {
-  if (!report) {
+export function ResultsTable({ hasReport, results, decimalSeparator }: ResultsTableProps) {
+  if (!hasReport) {
     return (
       <div className="table-wrap">
         <EmptyState />
+      </div>
+    );
+  }
+
+  if (!results.length) {
+    return (
+      <div className="table-wrap">
+        <div className="empty">
+          <p>All metrics are hidden</p>
+          <p className="muted">Choose the metrics to show under Metrics, above the table.</p>
+        </div>
       </div>
     );
   }
@@ -58,11 +69,11 @@ export function ResultsTable({ report, results, decimalSeparator }: ResultsTable
           </tr>
         </thead>
         <tbody>
-          {results.map((row, index) => (
-            <tr key={row.label}>
+          {results.map((row) => (
+            <tr key={row.key}>
               <td className="left">
                 {row.label}
-                {report.metrics[index].derived && (
+                {row.isDerived && (
                   <span className="derived" title="Recalculated from the summed columns">
                     {" "}
                     ƒ

@@ -32,6 +32,7 @@ Every numeric column in the export becomes a metric, in file order. Each one is 
 1. Open the website, or run the desktop app.
 2. **Open export...** and pick the `.xlsx` or `.csv` downloaded from SA360. You can also drop the file on the website, or onto the Windows exe. The comparison must be turned on so the `(Compared to)` columns are in the file.
 3. Switch segments with the tabs at the top. Untick campaigns to leave them out. A campaign you leave out of its segment is also left out of Generic overall.
+   On the website, **Metrics** (above the results) chooses which metrics are shown, copied and exported. Ratios still use hidden columns, so hiding Cost doesn't change Avg. CPC. The choice is remembered by metric name.
 4. Copy to Excel:
    - **Copy segment**: the segment you're viewing.
    - **Copy all segments**: all four, either **side by side** (Current / Compared columns per segment) or **stacked** (one block per segment, with a blank row between blocks).

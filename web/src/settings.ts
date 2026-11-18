@@ -5,6 +5,7 @@ import { POST_L, type SegmentKey } from "./core/report";
 export interface Settings extends CopyOptions {
   layout: Layout;
   segment: SegmentKey;
+  hiddenMetrics: string[];
 }
 
 const STORAGE_KEY = "generic-performance-settings";
@@ -21,6 +22,7 @@ function defaultSettings(): Settings {
     withHeader: false,
     layout: "side",
     segment: POST_L.key,
+    hiddenMetrics: [],
   };
 }
 

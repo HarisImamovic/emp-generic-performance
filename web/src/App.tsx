@@ -2,10 +2,12 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { CampaignList } from "./components/CampaignList";
 import { CopyOptionsPanel } from "./components/CopyOptionsPanel";
 import { Header } from "./components/Header";
+import { MetricPicker } from "./components/MetricPicker";
 import { ResultsTable } from "./components/ResultsTable";
 import { SegmentTabs } from "./components/SegmentTabs";
 import { SkippedColumnsNote } from "./components/SkippedColumnsNote";
 import { Toasts } from "./components/Toasts";
+import { withoutHiddenMetrics } from "./core/metricFilter";
 import { buildAllSegmentsText, buildClipboardText, exportXlsx } from "./core/output";
 import { loadReport } from "./core/read";
 import { POST_L, type Report, type ResultRow, SEGMENTS, type Segment, aggregate, segmentRows } from "./core/report";
@@ -16,6 +18,7 @@ import {
   COPY_BLOCKED,
   EXPORT_FAILED,
   FIRST_FILE_ONLY,
+  NO_METRICS_SHOWN,
   NOTHING_INCLUDED,
   copiedMessage,
   exportedMessage,
@@ -108,13 +111,15 @@ export default function App() {
     [report, excluded],
   );
   const visibleRows = useMemo(() => (report ? segmentRows(report, segment) : []), [report, segment]);
-  const results = useMemo(
+  const hiddenMetrics = useMemo(() => new Set(settings.hiddenMetrics), [settings.hiddenMetrics]);
+  const allResults = useMemo(
     () => (report ? aggregate(report, includedRows(segment)) : []),
     [report, segment, includedRows],
   );
+  const results = useMemo(() => withoutHiddenMetrics(allResults, hiddenMetrics), [allResults, hiddenMetrics]);
 
   const allSegmentResults = (loaded: Report): [Segment, ResultRow[]][] =>
-    SEGMENTS.map((s) => [s, aggregate(loaded, includedRows(s))]);
+    SEGMENTS.map((s) => [s, withoutHiddenMetrics(aggregate(loaded, includedRows(s)), hiddenMetrics)]);
 
   const copyText = async (text: string, what: string) => {
     try {
@@ -127,6 +132,10 @@ export default function App() {
 
   const copySegment = () => {
     if (!report) return;
+    if (!results.length) {
+      notify(NO_METRICS_SHOWN);
+      return;
+    }
     if (!includedRows(segment).length) {
       notify(NOTHING_INCLUDED);
       return;
@@ -136,12 +145,20 @@ export default function App() {
 
   const copyAllSegments = () => {
     if (!report) return;
+    if (!results.length) {
+      notify(NO_METRICS_SHOWN);
+      return;
+    }
     const blocks = allSegmentResults(report).map(([s, rows]): [string, ResultRow[]] => [s.short, rows]);
     void copyText(buildAllSegmentsText(blocks, settings, settings.layout), "all segments");
   };
 
   const exportToExcel = async () => {
     if (!report) return;
+    if (!results.length) {
+      notify(NO_METRICS_SHOWN);
+      return;
+    }
     const fileName = `${withoutExtension(report.fileName)}_summary.xlsx`;
     try {
       downloadFile(await exportXlsx(report, allSegmentResults(report), excluded), fileName);
@@ -190,8 +207,15 @@ export default function App() {
         <section className="card summary">
           <div className="card-head">
             <h2>{segment.label}</h2>
+            {report && (
+              <MetricPicker
+                metrics={allResults}
+                hiddenKeys={hiddenMetrics}
+                onChange={(keys) => updateSettings({ hiddenMetrics: keys })}
+              />
+            )}
           </div>
-          <ResultsTable report={report} results={results} decimalSeparator={settings.decimalSeparator} />
+          <ResultsTable hasReport={report !== null} results={results} decimalSeparator={settings.decimalSeparator} />
           {report && <SkippedColumnsNote skipped={report.skipped} />}
           <CopyOptionsPanel settings={settings} onChange={updateSettings} />
           <div className="actions">

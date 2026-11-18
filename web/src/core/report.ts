@@ -61,7 +61,9 @@ export interface Report {
 export type Sheet = [name: string | null, rows: Cell[][]];
 
 export interface ResultRow {
+  key: string;
   label: string;
+  isDerived: boolean;
   kind: Kind;
   cur: number | null;
   prev: number | null;
@@ -191,7 +193,9 @@ export function aggregate(report: Report, rowIndices: number[]): ResultRow[] {
   const current = periodTotals(report.metrics, rows, "cur");
   const previous = periodTotals(report.metrics, rows, "prev");
   return report.metrics.map((metric, index) => ({
+    key: normalizeKey(metric.label),
     label: metric.label,
+    isDerived: metric.derived !== null,
     kind: metric.kind,
     cur: current[index],
     prev: previous[index],
