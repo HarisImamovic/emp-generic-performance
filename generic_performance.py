@@ -12,6 +12,12 @@ from pathlib import Path
 
 APP_NAME = "Generic Performance"
 
+# Keyboard shortcuts use Command on macOS and Control elsewhere.
+MAC = sys.platform == "darwin"
+MOD = "Command" if MAC else "Control"
+KEY = "⌘" if MAC else "Ctrl+"
+SHIFT = "⇧" if MAC else "Shift+"
+
 
 # ---- segments ----------------------------------------------------------------
 # Mirrors the SA360 CASE rules:
@@ -695,7 +701,7 @@ def run_gui(initial_file: str | None = None) -> None:
     htext.pack(side="left")
     tk.Label(htext, text=APP_NAME, bg=HEADER_BG, fg="#ffffff", font=F_TITLE).pack(anchor="w")
     tk.Label(htext, textvariable=file_var, bg=HEADER_BG, fg=HEADER_SUB, font=F_SMALL).pack(anchor="w")
-    ttk.Button(hinner, text="Open export…   Ctrl+O", style="Accent.TButton",
+    ttk.Button(hinner, text=f"Open export…   {KEY}O", style="Accent.TButton",
                command=lambda: open_file()).pack(side="right")
 
     # ---- status bar (packed before body so it stays visible) ----------------
@@ -723,7 +729,7 @@ def run_gui(initial_file: str | None = None) -> None:
         lbl.pack(side="left", padx=(0, px(8)))
         lbl.bind("<Button-1>", lambda e, s=seg: select_segment(s))
         tabs[seg.key] = lbl
-    tk.Label(tabs_bar, text="Ctrl+1…4 to switch", bg=BG, fg=SUBTLE, font=F_SMALL).pack(side="right")
+    tk.Label(tabs_bar, text=f"{KEY}1…4 to switch", bg=BG, fg=SUBTLE, font=F_SMALL).pack(side="right")
 
     def paint_tabs():
         report = state["report"]
@@ -781,7 +787,7 @@ def run_gui(initial_file: str | None = None) -> None:
                command=lambda: copy_segment()).pack(side="right")
     ttk.Button(btns, text="Copy all segments", command=lambda: copy_all()).pack(side="right", padx=(px(8), 0))
     ttk.Button(btns, text="Export to Excel…", command=lambda: export_file()).pack(side="right", padx=px(8))
-    ttk.Label(btns, text="Ctrl+Shift+C segment  ·  Ctrl+Shift+A all",
+    ttk.Label(btns, text=f"{KEY}{SHIFT}C segment  ·  {KEY}{SHIFT}A all",
               style="CardMuted.TLabel").pack(side="left")
     tk.Frame(right, bg=BORDER, height=1).pack(side="bottom", fill="x", pady=px(12))
 
@@ -856,8 +862,8 @@ def run_gui(initial_file: str | None = None) -> None:
         canvas.yview_moveto(0)
 
     empty = tk.Label(table_frame, bg=CARD, fg=MUTED, font=(FAMILY, 11), justify="center",
-                     text="No data yet\n\nOpen an SA360 export (Ctrl+O)\n"
-                          "or drag the file onto Generic-Performance.exe")
+                     text=f"No data yet\n\nOpen an SA360 export ({KEY}O)"
+                          + ("" if MAC else "\nor drag the file onto Generic-Performance.exe"))
 
     # ---- behaviour ---------------------------------------------------------
     def open_file(path: str | None = None):
@@ -967,7 +973,7 @@ def run_gui(initial_file: str | None = None) -> None:
         root.clipboard_append(text)
         root.update()
         persist()
-        set_status(f"Copied {what} to clipboard - paste into Excel with Ctrl+V.", "ok")
+        set_status(f"Copied {what} to clipboard - paste into Excel with {KEY}V.", "ok")
 
     def copy_segment():
         if not state["report"] or not included(state["seg"]):
@@ -1012,11 +1018,11 @@ def run_gui(initial_file: str | None = None) -> None:
 
     dec_var.trace_add("write", recompute)
     lbox.bind("<<ListboxSelect>>", on_select)
-    root.bind("<Control-o>", lambda e: open_file())
-    root.bind("<Control-Shift-C>", lambda e: copy_segment())
-    root.bind("<Control-Shift-A>", lambda e: copy_all())
+    root.bind(f"<{MOD}-o>", lambda e: open_file())
+    root.bind(f"<{MOD}-Shift-C>", lambda e: copy_segment())
+    root.bind(f"<{MOD}-Shift-A>", lambda e: copy_all())
     for n, seg in enumerate(SEGMENTS, start=1):
-        root.bind(f"<Control-Key-{n}>", lambda e, s=seg: select_segment(s))
+        root.bind(f"<{MOD}-Key-{n}>", lambda e, s=seg: select_segment(s))
     root.protocol("WM_DELETE_WINDOW", lambda: (persist(), root.destroy()))
 
     recompute()
