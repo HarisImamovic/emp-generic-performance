@@ -1,9 +1,10 @@
 name: Build exe
 
-# Builds dist\Generic-Performance.exe on a GitHub-hosted Windows machine.
-# - Pushing a tag like v1.0.0 publishes the exe on the repo's Releases page.
-# - "Run workflow" on the Actions tab builds it without making a release
-#   (download it from the run's Artifacts section).
+# Builds the Windows exe and the macOS app on GitHub-hosted machines.
+# - Pushing a tag like v1.0.0 (or publishing a release with a new tag)
+#   attaches both files to that release on the Releases page.
+# - "Run workflow" on the Actions tab builds them without making a release
+#   (download them from the run's Artifacts section).
 
 on:
   push:
@@ -14,7 +15,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,12 +32,50 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Generic-Performance
+          name: Generic-Performance-Windows
           path: dist/Generic-Performance.exe
 
+  macos:
+    # Apple Silicon (M1 and newer) Macs.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt pyinstaller
+
+      - name: Check tkinter
+        run: python -c "import tkinter; print('Tk', tkinter.TkVersion)"
+
+      - name: Build app
+        run: pyinstaller --noconfirm --onedir --windowed --name Generic-Performance --osx-bundle-identifier com.generic-performance.app generic_performance.py
+
+      # ditto keeps the .app bundle's symlinks and permissions intact.
+      - name: Zip app
+        run: ditto -c -k --keepParent dist/Generic-Performance.app Generic-Performance-mac.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Generic-Performance-mac
+          path: Generic-Performance-mac.zip
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [windows, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/Generic-Performance.exe
+          files: |
+            Generic-Performance.exe
+            Generic-Performance-mac.zip
           generate_release_notes: true

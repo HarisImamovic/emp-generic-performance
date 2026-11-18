@@ -1,6 +1,6 @@
 # Generic Performance
 
-Small Windows desktop tool. It turns a Google Search Ads 360 campaign export into current-period vs. compared-period tables for the Generic Search segments, ready to paste into Excel.
+Small desktop tool for Windows and Mac. It turns a Google Search Ads 360 campaign export into current-period vs. compared-period tables for the Generic Search segments, ready to paste into Excel.
 
 ## Metrics
 
@@ -33,11 +33,14 @@ python generic_performance.py
 
 To build `dist\Generic-Performance.exe`, double-click `build_exe.bat`. It creates a local `.venv` and runs PyInstaller.
 
-## Download the exe (no Python needed)
+## Download (no Python needed)
 
-The exe bundles Python and every dependency, so users only need Windows. Download `Generic-Performance.exe` from the repo's **Releases** page and run it. The exe is unsigned, so on first run Windows may show "Windows protected your PC": click **More info → Run anyway**.
+Both downloads bundle Python and every dependency. Get them from the repo's **Releases** page: https://github.com/HarisImamovic/emp-generic-performance/releases/latest
 
-GitHub builds the exe automatically (`.github/workflows/build-exe.yml`):
+- **Windows:** `Generic-Performance.exe`. It is unsigned, so on first run Windows may show "Windows protected your PC": click **More info → Run anyway**.
+- **Mac (Apple Silicon, M1 or newer):** `Generic-Performance-mac.zip`. Unzip it and move `Generic-Performance.app` to Applications. It is unsigned, so the first time right-click the app → **Open** → **Open** (or System Settings → Privacy & Security → **Open Anyway**). Shortcuts use ⌘ instead of Ctrl.
 
-- **New release:** push a version tag, e.g. `git tag v1.0.0 && git push origin v1.0.0`. The exe is attached to a new release with that name.
-- **Test build without a release:** Actions tab → **Build exe** → **Run workflow**. The exe appears under the run's **Artifacts**.
+GitHub builds both automatically (`.github/workflows/build-exe.yml`):
+
+- **New release:** on the Releases page, **Draft a new release**, create a new tag such as `v1.1.0` and publish. Both files are attached to that release about a minute later.
+- **Test build without a release:** Actions tab → **Build exe** → **Run workflow**. The files appear under the run's **Artifacts** (sign-in required).
