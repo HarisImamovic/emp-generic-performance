@@ -1,4 +1,5 @@
 import { ReportError, type ReportErrorCode } from "./core/errors";
+import { MAX_FILE_MB } from "./core/read";
 import { type Report, missingCompared } from "./core/report";
 import type { ToastMessage } from "./hooks/useToasts";
 import { SHORTCUT_PREFIX } from "./platform";
@@ -15,6 +16,10 @@ const LOAD_ERRORS: Record<ReportErrorCode, Omit<ToastMessage, "tone">> = {
   "unsupported-file": {
     title: "That file type isn't supported",
     detail: "Choose the .xlsx or .csv file you downloaded from SA360.",
+  },
+  "too-large": {
+    title: "This file is too large",
+    detail: `Files up to ${MAX_FILE_MB} MB can be opened. SA360 campaign exports are much smaller, so check that you picked the right file.`,
   },
   "unreadable-file": {
     title: "Couldn't open this Excel file",

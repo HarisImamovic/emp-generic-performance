@@ -6,6 +6,7 @@ export interface Settings extends CopyOptions {
   layout: Layout;
   segment: SegmentKey;
   hiddenMetrics: string[];
+  metricOrder: string[];
 }
 
 const STORAGE_KEY = "generic-performance-settings";
@@ -23,6 +24,7 @@ function defaultSettings(): Settings {
     layout: "side",
     segment: POST_L.key,
     hiddenMetrics: [],
+    metricOrder: [],
   };
 }
 

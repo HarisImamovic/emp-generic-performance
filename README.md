@@ -32,7 +32,7 @@ Every numeric column in the export becomes a metric, in file order. Each one is 
 1. Open the website, or run the desktop app.
 2. **Open export...** and pick the `.xlsx` or `.csv` downloaded from SA360. You can also drop the file on the website, or onto the Windows exe. The comparison must be turned on so the `(Compared to)` columns are in the file.
 3. Switch segments with the tabs at the top. Untick campaigns to leave them out. A campaign you leave out of its segment is also left out of Generic overall.
-   On the website, **Metrics** (above the results) chooses which metrics are shown, copied and exported. Ratios still use hidden columns, so hiding Cost doesn't change Avg. CPC. The choice is remembered by metric name.
+   On the website, **Metrics** (above the results) chooses which metrics are shown, copied and exported, and in what order: drag a metric by its ⠿ handle (or focus the handle and use ↑ / ↓, Home, End). Ratios still use hidden columns, so hiding Cost doesn't change Avg. CPC. The choice and order are remembered by metric name; **Reset order** goes back to file order.
 4. Copy to Excel:
    - **Copy segment**: the segment you're viewing.
    - **Copy all segments**: all four, either **side by side** (Current / Compared columns per segment) or **stacked** (one block per segment, with a blank row between blocks).
@@ -54,6 +54,7 @@ Shortcuts:
 
 - **Sign-in:** the site is hosted on Cloudflare Pages behind **Cloudflare Access**. Only email addresses on the allow-list can open it. People enter their email and get a one-time code, so there are no passwords. Cloudflare checks this before sending any of the site's files. **Sign out** in the header ends the session.
 - **Client data:** the site has no server side. A file is read in the browser's memory and never sent anywhere. Closing the tab clears the data. The Content-Security-Policy (`web/public/_headers`) blocks all network requests from the page (`connect-src 'none'`) and loads nothing from other sites. To check it yourself, open the browser's developer tools, go to the **Network** tab and open a file: no requests appear. The only thing stored is the copy settings, in that browser's local storage.
+- **Untrusted files:** only `.xlsx` and `.csv` files are opened, and their contents are checked too: an `.xlsx` must really be an Excel workbook and a `.csv` must be text, so a renamed file is refused. Files over 200 MB are refused before they are read. Formulas and macros in a file are never run. Copied metric names that start with `=`, `+`, `-` or `@` get a leading `'`, so a crafted column header pastes into Excel as text instead of a formula (the desktop app does the same).
 
 ### Develop
 

@@ -2,8 +2,9 @@ import { ReportError } from "./errors";
 import type { Cell } from "./numbers";
 import { type Report, type Sheet, buildReport } from "./report";
 
-const CSV_EXTENSIONS = [".csv", ".tsv", ".txt"];
-const EXCEL_EXTENSIONS = [".xlsx", ".xlsm"];
+export const ACCEPTED_EXTENSIONS = [".xlsx", ".csv"];
+const ZIP_SIGNATURE = [0x50, 0x4b, 0x03, 0x04];
+const BINARY_CHECK_LENGTH = 65536;
 const SNIFF_SAMPLE_LENGTH = 50000;
 const SNIFF_CHUNK_LINES = 10;
 const SNIFF_MIN_CONSISTENCY = 0.9;
@@ -217,17 +218,43 @@ export async function readXlsxSheets(data: ArrayBuffer): Promise<Sheet[]> {
   });
 }
 
+export const MAX_FILE_MB = 200;
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
+
+export function checkFileSize(bytes: number): void {
+  if (bytes > MAX_FILE_BYTES) {
+    throw new ReportError(
+      "too-large",
+      `File is ${Math.round(bytes / 1024 / 1024)} MB, over the ${MAX_FILE_MB} MB limit.`,
+    );
+  }
+}
+
+function startsWith(bytes: Uint8Array, signature: number[]): boolean {
+  return signature.every((byte, index) => bytes[index] === byte);
+}
+
+function looksLikeText(bytes: Uint8Array): boolean {
+  if (startsWith(bytes, [0xff, 0xfe]) || startsWith(bytes, [0xfe, 0xff])) return true;
+  return !bytes.subarray(0, BINARY_CHECK_LENGTH).includes(0);
+}
+
 function extensionOf(fileName: string): string {
   const dot = fileName.lastIndexOf(".");
   return dot === -1 ? "" : fileName.slice(dot).toLowerCase();
 }
 
 export async function loadReport(fileName: string, data: ArrayBuffer): Promise<Report> {
+  checkFileSize(data.byteLength);
   const extension = extensionOf(fileName);
-  if (CSV_EXTENSIONS.includes(extension)) {
-    return buildReport(fileName, [[null, readCsvRows(new Uint8Array(data))]]);
+  const bytes = new Uint8Array(data);
+  if (extension === ".csv") {
+    if (!looksLikeText(bytes)) throw new ReportError("unsupported-file", "File named .csv is not text.");
+    return buildReport(fileName, [[null, readCsvRows(bytes)]]);
   }
-  if (EXCEL_EXTENSIONS.includes(extension)) {
+  if (extension === ".xlsx") {
+    if (!startsWith(bytes, ZIP_SIGNATURE))
+      throw new ReportError("unreadable-file", "File named .xlsx is not a workbook.");
     return buildReport(fileName, await readXlsxSheets(data));
   }
   if (extension === ".xls") {

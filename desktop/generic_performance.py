@@ -331,17 +331,32 @@ def _cell(values, idx):
     return values[idx] if idx is not None and idx < len(values) else None
 
 
+ACCEPTED_EXTENSIONS = (".xlsx", ".csv")
+_ZIP_SIGNATURE = b"PK\x03\x04"
+_BINARY_CHECK_LENGTH = 65536
+
+
+def _looks_like_text(head: bytes) -> bool:
+    return head[:2] in (b"\xff\xfe", b"\xfe\xff") or b"\x00" not in head
+
+
 def load_report(path: str | Path) -> Report:
     path = Path(path)
     ext = path.suffix.lower()
-    if ext in (".csv", ".tsv", ".txt"):
+    if ext not in ACCEPTED_EXTENSIONS:
+        if ext == ".xls":
+            raise ValueError("Old .xls format is not supported. Export from SA360 as .xlsx or .csv.")
+        raise ValueError(f"Unsupported file type: {ext or '(none)'}. Choose the .xlsx or .csv file from SA360.")
+    with path.open("rb") as f:
+        head = f.read(_BINARY_CHECK_LENGTH)
+    if ext == ".csv":
+        if not _looks_like_text(head):
+            raise ValueError("This .csv file is not text. Choose the .csv file downloaded from SA360.")
         sheets = [(None, _read_csv_rows(path))]
-    elif ext in (".xlsx", ".xlsm"):
-        sheets = _read_xlsx_sheets(path)
-    elif ext == ".xls":
-        raise ValueError("Old .xls format is not supported. Export from SA360 as .xlsx or .csv.")
     else:
-        raise ValueError(f"Unsupported file type: {ext}")
+        if not head.startswith(_ZIP_SIGNATURE):
+            raise ValueError("This .xlsx file is not an Excel workbook. It may be damaged or password-protected.")
+        sheets = _read_xlsx_sheets(path)
 
     for sheet_name, rows in sheets:
         found = _find_header(rows)
@@ -421,6 +436,14 @@ def _value_cells(r: ResultRow, dec_sep: str, with_change: bool) -> list[str]:
     return cells
 
 
+_FORMULA_START = ("=", "+", "-", "@")
+
+
+def excel_safe_text(text: str) -> str:
+    one_cell = re.sub(r"[\t\r\n]", " ", text)
+    return "'" + one_cell if one_cell.startswith(_FORMULA_START) else one_cell
+
+
 def build_clipboard_text(results: list[ResultRow], dec_sep: str, with_labels: bool,
                          with_change: bool, with_header: bool) -> str:
     lines = []
@@ -428,7 +451,8 @@ def build_clipboard_text(results: list[ResultRow], dec_sep: str, with_labels: bo
         cols = (["Metric"] if with_labels else []) + ["Current", "Compared"] + (["Change %"] if with_change else [])
         lines.append("\t".join(cols))
     for r in results:
-        lines.append("\t".join(([r.label] if with_labels else []) + _value_cells(r, dec_sep, with_change)))
+        lines.append("\t".join(([excel_safe_text(r.label)] if with_labels else []) +
+                               _value_cells(r, dec_sep, with_change)))
     return "\n".join(lines)
 
 
@@ -447,7 +471,7 @@ def build_all_segments_text(blocks: list[tuple[str, list[ResultRow]]], dec_sep: 
         lines.append("\t".join((["Metric"] if with_labels else []) +
                                [f"{name} - {c}" for name, _ in blocks for c in cols]))
     for k, first in enumerate(blocks[0][1]):
-        cells = [first.label] if with_labels else []
+        cells = [excel_safe_text(first.label)] if with_labels else []
         for _, results in blocks:
             cells += _value_cells(results[k], dec_sep, with_change)
         lines.append("\t".join(cells))
@@ -822,7 +846,7 @@ def run_gui(initial_file: str | None = None) -> None:
             path = filedialog.askopenfilename(
                 title="Open SA360 export",
                 initialdir=settings.get("last_dir") or str(Path.home() / "Downloads"),
-                filetypes=[("SA360 export", "*.xlsx *.xlsm *.csv *.tsv"), ("All files", "*.*")],
+                filetypes=[("SA360 export", " ".join("*" + e for e in ACCEPTED_EXTENSIONS))],
             )
             if not path:
                 return

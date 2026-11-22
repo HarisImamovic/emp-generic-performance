@@ -35,8 +35,16 @@ function valueCells(row: ResultRow, options: CopyOptions): string[] {
   return cells;
 }
 
+const FORMULA_START = /^[=+\-@]/;
+const CELL_BREAKS = /[\t\r\n]/g;
+
+export function excelSafeText(text: string): string {
+  const oneCell = text.replace(CELL_BREAKS, " ");
+  return FORMULA_START.test(oneCell) ? `'${oneCell}` : oneCell;
+}
+
 function labelCell(text: string, options: CopyOptions): string[] {
-  return options.withLabels ? [text] : [];
+  return options.withLabels ? [excelSafeText(text)] : [];
 }
 
 export function buildClipboardText(results: ResultRow[], options: CopyOptions): string {

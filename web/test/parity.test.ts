@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { type Kind, formatValue, toNumber } from "../src/core/numbers";
-import { buildAllSegmentsText, buildClipboardText } from "../src/core/output";
+import { buildAllSegmentsText, buildClipboardText, excelSafeText } from "../src/core/output";
 import { loadReport } from "../src/core/read";
 import { type ResultRow, SEGMENTS, aggregate, missingCompared, segmentOf, segmentRows } from "../src/core/report";
 
@@ -39,6 +39,10 @@ describe("number handling matches the desktop app", () => {
 
   it("parses number text the same", () => {
     for (const c of b.toNumber) closeTo(toNumber(c.text), c.out);
+  });
+
+  it("makes copied labels safe to paste the same", () => {
+    for (const c of b.excelSafeText) expect(excelSafeText(c.text), JSON.stringify(c.text)).toBe(c.out);
   });
 
   it("assigns segments the same", () => {

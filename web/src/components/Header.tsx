@@ -1,7 +1,8 @@
 import { forwardRef } from "react";
+import { ACCEPTED_EXTENSIONS } from "../core/read";
 import { SHORTCUT_PREFIX, SIGN_OUT_URL } from "../platform";
 
-const ACCEPTED_FILES = ".xlsx,.xlsm,.csv,.tsv,.txt";
+const ACCEPTED_FILES = ACCEPTED_EXTENSIONS.join(",");
 
 interface HeaderProps {
   fileSummary: string;
