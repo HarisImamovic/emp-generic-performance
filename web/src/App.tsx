@@ -7,9 +7,9 @@ import { ResultsTable } from "./components/ResultsTable";
 import { SegmentTabs } from "./components/SegmentTabs";
 import { SkippedColumnsNote } from "./components/SkippedColumnsNote";
 import { Toasts } from "./components/Toasts";
-import { withoutHiddenMetrics } from "./core/metricFilter";
+import { mergeMetricOrder, orderMetrics, withoutHiddenMetrics } from "./core/metricFilter";
 import { buildAllSegmentsText, buildClipboardText, exportXlsx } from "./core/output";
-import { loadReport } from "./core/read";
+import { checkFileSize, loadReport } from "./core/read";
 import { POST_L, type Report, type ResultRow, SEGMENTS, type Segment, aggregate, segmentRows } from "./core/report";
 import { useFileDrop } from "./hooks/useFileDrop";
 import { useShortcuts } from "./hooks/useShortcuts";
@@ -79,6 +79,7 @@ export default function App() {
     async (file: File) => {
       setIsReading(true);
       try {
+        checkFileSize(file.size);
         const loaded = await loadReport(file.name, await file.arrayBuffer());
         setReport(loaded);
         setExcluded(new Set());
@@ -113,13 +114,27 @@ export default function App() {
   const visibleRows = useMemo(() => (report ? segmentRows(report, segment) : []), [report, segment]);
   const hiddenMetrics = useMemo(() => new Set(settings.hiddenMetrics), [settings.hiddenMetrics]);
   const allResults = useMemo(
-    () => (report ? aggregate(report, includedRows(segment)) : []),
-    [report, segment, includedRows],
+    () => (report ? orderMetrics(aggregate(report, includedRows(segment)), settings.metricOrder) : []),
+    [report, segment, includedRows, settings.metricOrder],
   );
   const results = useMemo(() => withoutHiddenMetrics(allResults, hiddenMetrics), [allResults, hiddenMetrics]);
+  const isCustomOrder = useMemo(
+    () => report !== null && report.metrics.some((metric, index) => metric.label !== allResults[index]?.label),
+    [report, allResults],
+  );
 
   const allSegmentResults = (loaded: Report): [Segment, ResultRow[]][] =>
-    SEGMENTS.map((s) => [s, withoutHiddenMetrics(aggregate(loaded, includedRows(s)), hiddenMetrics)]);
+    SEGMENTS.map((s) => [
+      s,
+      withoutHiddenMetrics(orderMetrics(aggregate(loaded, includedRows(s)), settings.metricOrder), hiddenMetrics),
+    ]);
+
+  const reorderMetrics = (keys: string[]) =>
+    updateSettings({ metricOrder: mergeMetricOrder(settings.metricOrder, keys) });
+  const resetMetricOrder = () => {
+    const inFile = new Set(allResults.map((row) => row.key));
+    updateSettings({ metricOrder: settings.metricOrder.filter((key) => !inFile.has(key)) });
+  };
 
   const copyText = async (text: string, what: string) => {
     try {
@@ -212,6 +227,9 @@ export default function App() {
                 metrics={allResults}
                 hiddenKeys={hiddenMetrics}
                 onChange={(keys) => updateSettings({ hiddenMetrics: keys })}
+                onReorder={reorderMetrics}
+                isCustomOrder={isCustomOrder}
+                onResetOrder={resetMetricOrder}
               />
             )}
           </div>

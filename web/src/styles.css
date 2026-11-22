@@ -445,7 +445,7 @@ tbody tr:nth-child(even) {
   top: calc(100% + 6px);
   right: 0;
   z-index: 5;
-  width: 280px;
+  width: min(300px, calc(100vw - 32px));
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -465,22 +465,98 @@ tbody tr:nth-child(even) {
   max-height: 320px;
   overflow: auto;
 }
-.picker-panel label {
+.picker-panel li {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 6px;
   border-radius: 6px;
+}
+.picker-panel li:hover {
+  background: var(--stripe);
+}
+.picker-panel li.off label {
+  color: var(--subtle);
+}
+.picker-panel li.dragged {
+  position: relative;
+  z-index: 1;
+  background: var(--accent-soft);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
+}
+.picker-panel ul.is-dragging,
+.picker-panel ul.is-dragging * {
+  cursor: grabbing;
+  user-select: none;
+}
+.picker-panel label {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 2px;
   cursor: pointer;
 }
-.picker-panel label:hover {
-  background: var(--stripe);
+.picker-panel label > span:first-of-type {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .picker-panel input {
   accent-color: var(--accent);
 }
+.drag-handle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--subtle);
+  cursor: grab;
+  touch-action: none;
+}
+.drag-handle:hover,
+.drag-handle:focus-visible,
+li.dragged .drag-handle {
+  color: var(--accent);
+}
+.drag-handle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.grip {
+  fill: currentColor;
+}
+.picker-note .grip {
+  width: 7px;
+  height: 11px;
+  vertical-align: -1px;
+  color: var(--subtle);
+}
+.picker-foot {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+}
+.picker-foot .link {
+  flex: none;
+}
 .picker-note {
-  margin: 8px 0 0;
+  flex: 1;
+  margin: 0;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .toasts {
@@ -615,5 +691,12 @@ tbody tr:nth-child(even) {
   }
   .chg-arrow {
     display: none;
+  }
+  .drag-handle {
+    width: 36px;
+    height: 40px;
+  }
+  .picker-panel ul {
+    max-height: min(320px, 55vh);
   }
 }

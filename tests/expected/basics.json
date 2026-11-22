@@ -2443,6 +2443,52 @@
    "out": null
   }
  ],
+ "excelSafeText": [
+  {
+   "text": "Cost",
+   "out": "Cost"
+  },
+  {
+   "text": "=HYPERLINK(\"http://x\",\"y\")",
+   "out": "'=HYPERLINK(\"http://x\",\"y\")"
+  },
+  {
+   "text": "+1",
+   "out": "'+1"
+  },
+  {
+   "text": "-Cost",
+   "out": "'-Cost"
+  },
+  {
+   "text": "@SUM(A1)",
+   "out": "'@SUM(A1)"
+  },
+  {
+   "text": "Leads / Clicks",
+   "out": "Leads / Clicks"
+  },
+  {
+   "text": "a\tb",
+   "out": "a b"
+  },
+  {
+   "text": "line\r\nbreak",
+   "out": "line  break"
+  },
+  {
+   "text": " =x",
+   "out": " =x"
+  },
+  {
+   "text": "",
+   "out": ""
+  },
+  {
+   "text": "Cost - net",
+   "out": "Cost - net"
+  }
+ ],
  "segmentOf": [
   {
    "name": "US_SearchNB_Post",

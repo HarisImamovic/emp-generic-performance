@@ -75,6 +75,9 @@ def basics() -> dict:
     return {
         "fmt": fmt,
         "toNumber": [{"text": t, "out": gp.to_number(t)} for t in NUMBER_TEXTS],
+        "excelSafeText": [{"text": t, "out": gp.excel_safe_text(t)} for t in [
+            "Cost", '=HYPERLINK("http://x","y")', "+1", "-Cost", "@SUM(A1)", "Leads / Clicks",
+            "a\tb", "line\r\nbreak", " =x", "", "Cost - net"]],
         "segmentOf": [{"name": n, "out": (s.key if (s := gp.segment_of(n)) else None)} for n in [
             "US_SearchNB_Post", "searchnb_dma_x", "SEARCHNB", "searchnb_nsh", "brand", "SearchNB-Postal-DMA"]],
     }
